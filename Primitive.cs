@@ -42,7 +42,7 @@ namespace Template
         // Normal vector of plane
         public Vector3 N { get; set; }
 
-        public Plane(Vector3 n, Vector3 pos, Vector3 color) : base(pos)
+        public Plane(Vector3 n, Vector3 pos) : base(pos)
         {
             N = n;
             Pos = pos;
@@ -50,7 +50,7 @@ namespace Template
 
         public Plane(float x, float y, float z, float ux, float uy, float uz) : this(
             new Vector3(x, y, z),
-            new Vector3(ux, uy, uz),
+            new Vector3(ux, uy, uz)
         )
         { }
     }
