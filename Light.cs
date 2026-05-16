@@ -18,5 +18,11 @@ namespace Template
             Pos = pos;
             Intensity = intensity;
         }
+
+        public Light(float x, float y, float z, float r, float g, float b) : this(
+            new Vector3(x, y, z),
+            new Vector3(r, g, b)
+        )
+        { }
     }
 }

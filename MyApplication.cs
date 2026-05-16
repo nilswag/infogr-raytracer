@@ -9,18 +9,21 @@ namespace Template
         // member variables
         public Surface screen;
         private readonly Stopwatch timer = new();
+
         // constructor
         public MyApplication(Surface screen)
         {
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
             this.screen = screen;
         }
+
         // initialize
         public void Init()
         {
             // (optional) example of how you can load a triangle mesh in any file format supported by Assimp
             object? mesh = Util.ImportMesh("../../../assets/cube.obj");
         }
+
         // tick: renders one frame
         private TimeSpan deltaTime = new();
         private uint frames = 0;
