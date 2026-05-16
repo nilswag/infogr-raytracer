@@ -3,14 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace INFOGRTemplate
+namespace Template
 {
-    class Primitive
+    public class Primitive
     {
         // TODO: Ray intersection logic
     }
 
-    class Sphere : Primitive
+    public class Sphere : Primitive
     { 
         // Position of sphere
         public Vector3 Pos { get; set; }
@@ -25,7 +25,7 @@ namespace INFOGRTemplate
         }
     }
 
-    class Plane : Primitive
+    public class Plane : Primitive
     {
         // Normal vector of plane
         public Vector3 N { get; set; }
