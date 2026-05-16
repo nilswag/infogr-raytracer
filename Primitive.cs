@@ -24,7 +24,7 @@ namespace Template
         // Radius of sphere
         public float Radius { get; set; }
 
-        public Sphere(Vector3 pos, float radius, Vector3 color) : base(pos)
+        public Sphere(Vector3 pos, float radius) : base(pos)
         {
             Pos = pos;
             Radius = radius;

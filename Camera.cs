@@ -27,9 +27,7 @@ namespace Template
             Screen = [
                 // Deze hoeken van het scherm kun je in template.cs vinden (TODO: waardes niet hardcoden)
                 new Vector3(0.0f, 0.0f, 0.0f),
-                new Vector3(640.0f, 0.0f, 0.0f),
                 new Vector3(640.0f, 400.0f, 0.0f),
-                new Vector3(0.0f, 400.0f, 0.0f),
                 ];
         }
     }
