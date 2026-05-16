@@ -8,16 +8,16 @@ namespace Template
     public class Camera
     {
         // Positie van camera
-        private Vector3 Pos { get; set; }
+        public Vector3 Pos { get; set; }
 
         // Punt waar camera naartoe kijkt
-        private Vector3 LookAt { get; set; }
+        public Vector3 LookAt { get; set; }
 
         // Richting wat boven is vanuit de camera
-        private Vector3 UpDirection { get; set; }
+        public Vector3 UpDirection { get; set; }
 
         // Array van hoeken die het scherm vlak bepalen
-        private Vector3[] Screen { get; set; }
+        public Vector3[] Screen { get; set; }
 
         public Camera()
         {
