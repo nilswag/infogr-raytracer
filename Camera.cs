@@ -10,25 +10,35 @@ namespace Template
         // Positie van camera
         public Vector3 Pos { get; set; }
 
-        // Punt waar camera naartoe kijkt
-        public Vector3 LookAt { get; set; }
+        // Richting van camera
+        public Vector3 Forward { get; set; }
+        public Vector3 Right { get; set; }
+        public Vector3 Up { get; set; }
 
-        // Richting wat boven is vanuit de camera
-        public Vector3 UpDirection { get; set; }
+        // FOV in graden
+        public float FOV { get; set; }
 
-        // Array van hoeken die het scherm vlak bepalen
-        public Vector3[] Screen { get; set; }
+        // Aspect ratio
+        public float AspectRatio { get; set; }
 
-        public Camera()
+        public Vector3[] ImagePlane { get; }
+
+        public Camera(Vector3 pos, float fov, float aspectRatio, Vector3 target)
         {
-            Pos = new Vector3(0.0f, 0.0f, 0.0f);
-            LookAt = new Vector3(0.0f, 0.0f, 1.0f);
-            UpDirection = new Vector3(0.0f, 1.0f, 0.0f);
-            Screen = [
-                // Deze hoeken van het scherm kun je in template.cs vinden (TODO: waardes niet hardcoden)
-                new Vector3(0.0f, 0.0f, 0.0f),
-                new Vector3(640.0f, 400.0f, 0.0f),
-                ];
+            Pos = pos;
+            FOV = fov;
+            AspectRatio = aspectRatio;
+            ImagePlane = new Vector3[2];
+            LookAt(target);
+        }
+
+        public void LookAt(Vector3 target)
+        {
+            Forward = Vector3.Normalize(target - Pos);
+            Right = Vector3.Normalize(Vector3.Cross(Vector3.UnitY, Forward));
+            Up = Vector3.Normalize(Vector3.Cross(Forward, Right));
+
+
         }
     }
 }

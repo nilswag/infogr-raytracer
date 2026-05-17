@@ -22,7 +22,7 @@ namespace Template
         }
 
         // Overridable function voor intersection (neemt aan dat de ray de richtings vector + p0 is)
-        public abstract bool Intersect(Vector3 ray);
+        public abstract bool Intersect(Vector3 ray, Vector3 origin);
     }
 
     public class Sphere : Primitive
@@ -44,9 +44,9 @@ namespace Template
         )
         { }
 
-        public override bool Intersect(Vector3 ray)
+        public override bool Intersect(Vector3 direction, Vector3 origin)
         {
-            throw new NotImplementedException();
+            return false;
         }
     }
 
@@ -68,7 +68,7 @@ namespace Template
         )
         { }
 
-        public override bool Intersect(Vector3 ray)
+        public override bool Intersect(Vector3 ray, Vector3 origin)
         {
             throw new NotImplementedException();
         }
