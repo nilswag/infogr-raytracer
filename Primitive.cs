@@ -47,16 +47,22 @@ namespace Template
 
         public override bool Intersect(Vector3 direction, Vector3 origin)
         {
+            // Vul P(t) = direction * t + origin in bij ||P - M||^2 = r^2 (de sphere formule)
+            // Dan los op in termen van t en krijg a, b en c
             float a = Vector3.Dot(direction, direction);
             float b = 2 * Vector3.Dot(direction, origin - Pos);
             float c = Vector3.Dot(origin - Pos, origin - Pos) - Radius * Radius;
             float d = b * b - 4 * a * c;
 
+            // als discriminant kleiner is dan 0 dan raakt de ray de sphere niet.
             if (d < 0) return false;
 
+            // vindt beide oplossingen
             float t1 = (-b + (float)Math.Sqrt(d)) / (2 * a);
             float t2 = (-b - (float)Math.Sqrt(d)) / (2 * a);
 
+            // als de oplossing <= 0 is dan is de intersection in of achter de camera, dus daarom paakt hij juist
+            // de oplossing die groter dan 0 is.
             return t1 > 0 || t2 > 0;
         }
     }
