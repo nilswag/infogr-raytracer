@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Template
 {
-    public class Primitive
+    public abstract class Primitive
     {
         // TODO: Ray intersection logic
         
@@ -16,6 +16,9 @@ namespace Template
         {
             Pos = pos;
         }
+
+        // Overridable function voor intersection (neemt aan dat de ray de richtings vector + p0 is)
+        public abstract bool Intersect(Vector3 ray);
     }
 
     public class Sphere : Primitive
@@ -35,6 +38,11 @@ namespace Template
             radius
         )
         { }
+
+        public override bool Intersect(Vector3 ray)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class Plane : Primitive
@@ -53,5 +61,10 @@ namespace Template
             new Vector3(ux, uy, uz)
         )
         { }
+
+        public override bool Intersect(Vector3 ray)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

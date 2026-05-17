@@ -48,7 +48,10 @@ namespace Template
             {
                 for (float y = bl.Y; y <= tr.Y; y++)
                 {
-                    Vector3 p = new Vector3(x, y, bl.Z);
+                    // TODO: Misschien dit beter abstracten
+                    // Richtings vector van de ray (vanuit de camera)
+                    Vector3 ray = new Vector3(x, y, bl.Z) - Camera.Pos;
+
                 }
             }
         }
