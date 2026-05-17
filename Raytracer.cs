@@ -17,19 +17,18 @@ namespace Template
         public Raytracer()
         {
             Surf = new Surface(640, 400); // groote is voor nu hard-coded op basis van template.cs
-            Camera = new Camera(Vector3.Zero, Vector3.UnitZ);
         }
 
-        public void Render(RTScene scene, Surface dest)
+        public void Render(RTScene scene, Camera camera, Surface dest)
         {
+            // 1/2 van breedte/hoogte van image plane
+            float dx = (float)Math.Tan(camera.FOV / 2.0 * (Math.PI / 180.0));
+            float dy = (float)(dx / camera.AspectRatio);
+
             for (int x = 0; x < Surf.width; x++)
             {
                 for (int y = 0; y < Surf.height; y++)
                 {
-                    // 1/2 van breedte/hoogte van image plane
-                    float dx = (float)Math.Tan(Camera.FOV / 2.0 * (Math.PI / 180.0));
-                    float dy = (float)(dx / Camera.AspectRatio);
-
                     // eerst normalizeren wij de pixels naar [0, 1] (daardoor wordt het een percentage)
                     float u = (float)x / Surf.width;
                     float v = (float)y / Surf.height;
@@ -42,13 +41,13 @@ namespace Template
                     // origin: camera positie
                     // richting (px * Camera.Right, py * Camera.Up)
                     // we scalen px ook met dx gezien we van [-1, 1] -> imagePlane willen mappen
-                    Vector3 ray = Camera.Pos + Camera.Forward
-                        + px * dx * Camera.Right
-                        + py * dy * Camera.Up;
+                    Vector3 ray = camera.Pos + camera.Forward
+                        + px * dx * camera.Right
+                        + py * dy * camera.Up;
 
                     foreach (var obj in scene.Primitives)
                     {
-                        if (!obj.Intersect(ray, Camera.Pos)) continue;
+                        if (!obj.Intersect(ray, camera.Pos)) continue;
                         Surf.Plot(x, y, obj.Color);
                     }
                 }

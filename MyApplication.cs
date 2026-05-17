@@ -10,8 +10,9 @@ namespace Template
         public Surface screen;
         private readonly Stopwatch timer = new();
 
-        private Raytracer Raytracer;
-        public Dictionary<string, RTScene> Scenes { get; }
+        private Raytracer rayTracer;
+        private Camera camera;
+        public Dictionary<string, RTScene> scenes { get; }
 
         // constructor
         public MyApplication(Surface screen)
@@ -19,8 +20,9 @@ namespace Template
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
             this.screen = screen;
 
-            Raytracer = new Raytracer();
-            Scenes = [];
+            rayTracer = new Raytracer();
+            camera = new Camera(Vector3.Zero, Vector3.UnitZ, fov: 120f, aspectRatio: 1.6f);
+            scenes = [];
         }
 
         // initialize
@@ -29,13 +31,13 @@ namespace Template
             // (optional) example of how you can load a triangle mesh in any file format supported by Assimp
             object? mesh = Util.ImportMesh("../../../assets/cube.obj");
 
-            Scenes["basic"] = new RTScene(
+            scenes["basic"] = new RTScene(
                 [], // array van lights, is voor nu leeg gezien we er niks mee doen
                 [
                     //          x   y   z   r    red  green blue
-                    new Sphere(-5f, 0f, 5f, 2f, 255f, 0f, 0f),
-                    new Sphere(0f, 0f, 5f, 2f, 0f, 255, 0f),
-                    new Sphere(5f, 0f, 5f, 2f, 0f, 0f, 255f)
+                    new Sphere(-5f, 0f, 10f, 2f, 255f, 0f, 0f),
+                    new Sphere(0f, 0f, 10f, 2f, 0f, 255, 0f),
+                    new Sphere(5f, 0f, 10f, 2f, 0f, 0f, 255f)
                 ]
             );
         }
@@ -50,7 +52,7 @@ namespace Template
 
             screen.Clear(0);
 
-            Raytracer.Render(Scenes["basic"], screen);
+            rayTracer.Render(scenes["basic"], camera, screen);
 
             deltaTime += timer.Elapsed;
             frames++;

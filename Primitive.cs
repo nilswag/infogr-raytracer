@@ -1,4 +1,5 @@
-﻿using OpenTK.Mathematics;
+﻿using Assimp;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -22,7 +23,7 @@ namespace Template
         }
 
         // Overridable function voor intersection (neemt aan dat de ray de richtings vector + p0 is)
-        public abstract bool Intersect(Vector3 ray, Vector3 origin);
+        public abstract bool Intersect(Vector3 direction, Vector3 origin);
     }
 
     public class Sphere : Primitive
@@ -46,7 +47,17 @@ namespace Template
 
         public override bool Intersect(Vector3 direction, Vector3 origin)
         {
-            return true;
+            float a = Vector3.Dot(direction, direction);
+            float b = 2 * Vector3.Dot(direction, origin - Pos);
+            float c = Vector3.Dot(origin - Pos, origin - Pos) - Radius * Radius;
+            float d = b * b - 4 * a * c;
+
+            if (d < 0) return false;
+
+            float t1 = (-b + (float)Math.Sqrt(d)) / (2 * a);
+            float t2 = (-b - (float)Math.Sqrt(d)) / (2 * a);
+
+            return t1 > 0 || t2 > 0;
         }
     }
 
