@@ -42,9 +42,15 @@ namespace Template
                     // origin: camera positie
                     // richting (px * Camera.Right, py * Camera.Up)
                     // we scalen px ook met dx gezien we van [-1, 1] -> imagePlane willen mappen
-                    Vector3 ray = Camera.Pos
+                    Vector3 ray = Camera.Pos + Camera.Forward
                         + px * dx * Camera.Right
                         + py * dy * Camera.Up;
+
+                    foreach (var obj in scene.Primitives)
+                    {
+                        if (!obj.Intersect(ray, Camera.Pos)) continue;
+                        Surf.Plot(x, y, obj.Color);
+                    }
                 }
             }
 

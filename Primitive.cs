@@ -46,7 +46,7 @@ namespace Template
 
         public override bool Intersect(Vector3 direction, Vector3 origin)
         {
-            return false;
+            return true;
         }
     }
 
