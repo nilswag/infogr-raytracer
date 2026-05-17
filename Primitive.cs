@@ -11,10 +11,14 @@ namespace Template
         
         // Position of primitive
         public Vector3 Pos { get; set; }
+        
+        // Kleur van primitive
+        public Vector3 Color { get; set; }
 
-        public Primitive(Vector3 pos)
+        public Primitive(Vector3 pos, Vector3 color)
         {
             Pos = pos;
+            Color = color;
         }
 
         // Overridable function voor intersection (neemt aan dat de ray de richtings vector + p0 is)
@@ -27,15 +31,16 @@ namespace Template
         // Radius of sphere
         public float Radius { get; set; }
 
-        public Sphere(Vector3 pos, float radius) : base(pos)
+        public Sphere(Vector3 pos, float radius, Vector3 color) : base(pos, color)
         {
             Pos = pos;
             Radius = radius;
         }
 
-        public Sphere(float x, float y, float z, float radius) : this(
+        public Sphere(float x, float y, float z, float radius, float r, float g, float b) : this(
             new Vector3(x, y, z),
-            radius
+            radius,
+            new Vector3(r, g, b)
         )
         { }
 
@@ -50,15 +55,16 @@ namespace Template
         // Normal vector of plane
         public Vector3 N { get; set; }
 
-        public Plane(Vector3 n, Vector3 pos) : base(pos)
+        public Plane(Vector3 n, Vector3 pos, Vector3 color) : base(pos, color)
         {
             N = n;
             Pos = pos;
         }
 
-        public Plane(float x, float y, float z, float ux, float uy, float uz) : this(
+        public Plane(float x, float y, float z, float ux, float uy, float uz, float r, float g, float b) : this(
             new Vector3(x, y, z),
-            new Vector3(ux, uy, uz)
+            new Vector3(ux, uy, uz),
+            new Vector3(r, g, b)
         )
         { }
 
