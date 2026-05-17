@@ -13,9 +13,9 @@ namespace Template
         public Vector3 Pos { get; set; }
         
         // Kleur van primitive
-        public Vector3 Color { get; set; }
+        public Color3 Color { get; set; }
 
-        public Primitive(Vector3 pos, Vector3 color)
+        public Primitive(Vector3 pos, Color3 color)
         {
             Pos = pos;
             Color = color;
@@ -31,7 +31,7 @@ namespace Template
         // Radius of sphere
         public float Radius { get; set; }
 
-        public Sphere(Vector3 pos, float radius, Vector3 color) : base(pos, color)
+        public Sphere(Vector3 pos, float radius, Color3 color) : base(pos, color)
         {
             Pos = pos;
             Radius = radius;
@@ -40,7 +40,7 @@ namespace Template
         public Sphere(float x, float y, float z, float radius, float r, float g, float b) : this(
             new Vector3(x, y, z),
             radius,
-            new Vector3(r, g, b)
+            new Color3(r, g, b)
         )
         { }
 
@@ -55,7 +55,7 @@ namespace Template
         // Normal vector of plane
         public Vector3 N { get; set; }
 
-        public Plane(Vector3 n, Vector3 pos, Vector3 color) : base(pos, color)
+        public Plane(Vector3 n, Vector3 pos, Color3 color) : base(pos, color)
         {
             N = n;
             Pos = pos;
@@ -64,7 +64,7 @@ namespace Template
         public Plane(float x, float y, float z, float ux, float uy, float uz, float r, float g, float b) : this(
             new Vector3(x, y, z),
             new Vector3(ux, uy, uz),
-            new Vector3(r, g, b)
+            new Color3(r, g, b)
         )
         { }
 

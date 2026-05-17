@@ -40,6 +40,7 @@ namespace Template
         public void Render()
         {
             if (!Scenes.ContainsKey(CurrentScene)) return;
+            RTScene scene = Scenes[CurrentScene];
 
             Vector3 bl = Camera.Screen[0];
             Vector3 tr = Camera.Screen[2];
@@ -51,7 +52,18 @@ namespace Template
                     // TODO: Misschien dit beter abstracten
                     // Richtings vector van de ray (vanuit de camera)
                     Vector3 ray = new Vector3(x, y, bl.Z) - Camera.Pos;
+                    foreach (var obj in scene.Primitives)
+                    {
+                        if (!obj.Intersect(ray)) continue;
 
+                        int[] color = [
+                            (int)obj.Color.X,
+                            (int)obj.Color.Y,
+                            (int)obj.Color.Z
+                        ];
+
+                        Display.pixels[(int)(y * tr.X + x)] = ;
+                    }
                 }
             }
         }
