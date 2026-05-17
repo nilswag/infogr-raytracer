@@ -10,11 +10,15 @@ namespace Template
         public Surface screen;
         private readonly Stopwatch timer = new();
 
+        private Raytracer Raytracer;
+
         // constructor
         public MyApplication(Surface screen)
         {
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
             this.screen = screen;
+
+            Raytracer = new Raytracer();
         }
 
         // initialize
@@ -34,14 +38,8 @@ namespace Template
 
             screen.Clear(0);
 
-            for (int row = 0; row < screen.height; row++)
-            {
-                for (int column = 0; column < screen.width; column++)
-                {
-                    // REPLACE THIS WITH THE CORRECT COLOR FOR THIS PIXEL FROM YOUR RAY TRACER
-                    screen.Plot(column, row, new Color3(0.5f, 0.5f, 0.5f));
-                }
-            }
+            Raytracer.Render(screen);
+            //Console.WriteLine(111);
 
             deltaTime += timer.Elapsed;
             frames++;

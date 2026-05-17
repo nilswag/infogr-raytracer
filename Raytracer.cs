@@ -27,23 +27,23 @@ namespace Template
             Scenes["basic"] = new RTScene(
                 [], // array van lights, is voor nu leeg gezien we er niks mee doen
                 [
-                    //          x      y    z      r
-                    new Sphere(-5.0f, 0.0f, 5.0f, 2.0f),
-                    new Sphere(0.0f, 0.0f, 5.0f, 2.0f),
-                    new Sphere(5.0f, 0.0f, 5.0f, 2.0f)
+                    //          x   y   z   r    red  green blue
+                    new Sphere(-5f, 0f, 5f, 2f, 255f, 0f, 0f),
+                    new Sphere(0f, 0f, 5f, 2f, 0f, 255, 0f),
+                    new Sphere(5f, 0f, 5f, 2f, 0f, 0f, 255f)
                 ]
             );
 
             CurrentScene = "basic";
         }
 
-        public void Render()
+        public void Render(Surface dest)
         {
             if (!Scenes.ContainsKey(CurrentScene)) return;
             RTScene scene = Scenes[CurrentScene];
 
             Vector3 bl = Camera.Screen[0];
-            Vector3 tr = Camera.Screen[2];
+            Vector3 tr = Camera.Screen[1];
 
             for (float x = bl.X; x <= tr.X; x++)
             {
@@ -55,17 +55,12 @@ namespace Template
                     foreach (var obj in scene.Primitives)
                     {
                         if (!obj.Intersect(ray)) continue;
-
-                        int[] color = [
-                            (int)obj.Color.X,
-                            (int)obj.Color.Y,
-                            (int)obj.Color.Z
-                        ];
-
-                        Display.pixels[(int)(y * tr.X + x)] = ;
+                        Display.Plot((int)x, (int)y, obj.Color);
                     }
                 }
             }
+
+            dest.CopyTo(Display);
         }
     }
 }
