@@ -1,59 +1,111 @@
 ﻿using Assimp;
+using OpenTK.Audio.OpenAL;
+using OpenTK.Graphics.ES11;
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Reflection.Metadata;
 using System.Text;
 
 namespace Template
 {
     public class Raytracer
     {
+        // TODO: Laat het de debug output maken bij middelste y waarde
+        // Werkt nu voor matte oppervlakken 
+        // TODO: Laat het werken voor glossy primitives en gemixte (wss moet primitive class ook wat extra members dan)
+        // TODO: Laat het werken voor spiegels
+
         // Surface waar de raytracer op gaat werken
         public Surface Surf { get; set; }
 
         // Camera
         public Camera Camera { get; set; }
 
-        public Raytracer()
+        //Scene
+        public RTScene Scene {get; set;}
+
+
+        Color3 AmbientLight = new Color3(0.08f, 0.08f, 0.08f);
+
+        float epsilon = 0.0001f;
+
+
+        public Raytracer(Surface surf, Camera camera, RTScene scene)
         {
-            Surf = new Surface(640, 400); // groote is voor nu hard-coded op basis van template.cs
+            Surf = surf;
+            Camera = camera;
+            Scene = scene;
         }
 
-        public void Render(RTScene scene, Camera camera, Surface dest)
-        {
-            // 1/2 van breedte/hoogte van image plane
-            float dx = (float)Math.Tan(camera.FOV / 2.0 * (Math.PI / 180.0));
-            float dy = (float)(dx / camera.AspectRatio);
+        public void Render()
+        { 
+            // We map each pixel point (x,y) to a real point on the image plane.
+            // Any point 𝑃(𝑎,𝑏) on the image plane has 3D location 𝑃0 + a * u + b * v 
+            // where a = (x+0,5)/w and b = (y+0,5)/h, and 𝑎,𝑏 ∈ [0,1] inside the image rectangle. 
+            // This point corresponds with pixel (x,y)
+            Vector3 u = Camera.ImagePlane[1] - Camera.ImagePlane[0];
+            Vector3 v = Camera.ImagePlane[2] - Camera.ImagePlane[0];
 
             for (int x = 0; x < Surf.width; x++)
             {
                 for (int y = 0; y < Surf.height; y++)
                 {
-                    // eerst normalizeren wij de pixels naar [0, 1] (daardoor wordt het een percentage)
-                    float u = (float)x / Surf.width;
-                    float v = (float)y / Surf.height;
-
-                    // dan mappen we [0, 1] -> [-1, 1]
-                    float px = 2 * u - 1.0f;
-                    float py = 2 * v - 1.0f;
-
-                    // nu maken wij de ray
-                    // origin: camera positie
-                    // richting (px * Camera.Right, py * Camera.Up)
-                    // we scalen px ook met dx gezien we van [-1, 1] -> imagePlane willen mappen
-                    Vector3 ray = camera.Pos + camera.Forward
-                        + px * dx * camera.Right
-                        + py * dy * camera.Up;
-
-                    foreach (var obj in scene.Primitives)
+                    //Constructing the ray through this pixel
+                    float a = (x+0.5f)/Surf.width;
+                    float b = (y+0.5f)/Surf.height;
+                    Vector3 planePoint = Camera.ImagePlane[0] + a * u + b * v;
+                    Vector3 direction = planePoint - Camera.Pos;
+                    
+                    //Finding the closest intersection
+                    Intersection closestInter = new Intersection(Camera.Pos, float.PositiveInfinity, new Plane(Camera.Pos, Camera.Pos, new Color3(0f, 0f, 0f)), Camera.Pos); //random values
+                    foreach (var obj in Scene.Primitives)
                     {
-                        if (!obj.Intersect(ray, camera.Pos)) continue;
-                        Surf.Plot(x, y, obj.Color);
+                        Intersection inter = obj.Intersect(Vector3.Normalize(direction), Camera.Pos);
+                        if (inter != null && inter.Dist < closestInter.Dist)
+                        {
+                            closestInter = inter;
+                        }
                     }
+
+                    //Shading this intersection correctly, but only if one was found.
+                    Color3 color = new Color3(0f, 0f, 0f);
+                    if(closestInter.Dist < float.PositiveInfinity)
+                    {
+                        Color3 primColor = closestInter.Prim.Color;
+                        color = AmbientLight * primColor; //Add ambient lighting as base
+
+                        //Go through all lights in the scene, and add their effects.
+                        foreach (var light in Scene.Lights)
+                        {
+                            Vector3 shadowRay = light.Pos - closestInter.Pos;
+                            bool hits = false;
+
+                            //Check if the shadowray hits obstacle on the way to light
+                            foreach (var obstacle in Scene.Primitives){
+                                Intersection hit = obstacle.Intersect(shadowRay, closestInter.Pos);
+                                float totalLength = (light.Pos - closestInter.Pos).Length;
+                                if (hit != null && epsilon < hit.Dist && hit.Dist < totalLength - epsilon)
+                                {
+                                    hits = true;
+                                }
+                            
+                            }
+
+                            //If no obstacle was hit, calculate the color of the pixel with the lights effects
+                            if (!hits)
+                            {
+                                float radiusSquared = (light.Pos-closestInter.Pos).Length * (light.Pos-closestInter.Pos).Length;
+                                Vector3 lightDirection = Vector3.Normalize(light.Pos - closestInter.Pos);
+                                color += (light.Intensity/radiusSquared) * primColor * MathF.Max(0, Vector3.Dot(closestInter.Norm, lightDirection));
+                            }
+                        }
+                        
+                    }
+                    Surf.Plot(x, y, color);
                 }
             }
-
-            Surf.CopyTo(dest);
         }
     }
 }

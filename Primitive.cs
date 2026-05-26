@@ -22,8 +22,8 @@ namespace Template
             Color = color;
         }
 
-        // Overridable function voor intersection (neemt aan dat de ray de richtings vector + p0 is)
-        public abstract bool Intersect(Vector3 direction, Vector3 origin);
+        // Overridable function voor intersection
+        public abstract Intersection Intersect(Vector3 direction, Vector3 origin);
     }
 
     public class Sphere : Primitive
@@ -45,8 +45,9 @@ namespace Template
         )
         { }
 
-        public override bool Intersect(Vector3 direction, Vector3 origin)
+        public override Intersection Intersect(Vector3 direction, Vector3 origin)
         {
+            // Neemt aan dat de ray de !genormaliseerde! richtings vector + p0 is
             // Vul P(t) = direction * t + origin in bij ||P - M||^2 = r^2 (de sphere formule)
             // Dan los op in termen van t en krijg a, b en c
             float a = Vector3.Dot(direction, direction);
@@ -55,15 +56,27 @@ namespace Template
             float d = b * b - 4 * a * c;
 
             // als discriminant kleiner is dan 0 dan raakt de ray de sphere niet.
-            if (d < 0) return false;
+            if (d < 0) return null;
 
             // vindt beide oplossingen
             float t1 = (-b + (float)Math.Sqrt(d)) / (2 * a);
             float t2 = (-b - (float)Math.Sqrt(d)) / (2 * a);
 
-            // als de oplossing <= 0 is dan is de intersection in of achter de camera, dus daarom paakt hij juist
-            // de oplossing die groter dan 0 is.
-            return t1 > 0 || t2 > 0;
+            // return de "zichtbare" intersection
+            if (t1 < t2 && t1 > 0) {
+                Vector3 position = direction * t1 + origin;
+                Vector3 normal = position - this.Pos;
+                return new Intersection(position, t1, this, Vector3.Normalize(normal));
+            } else if (t2 <= t1 && t2 > 0)
+            {
+                Vector3 position = direction * t2 + origin;
+                Vector3 normal = position - this.Pos;
+                return new Intersection(position, t2, this, Vector3.Normalize(normal));
+                
+            } else
+            {
+                return null;
+            }
         }
     }
 
@@ -74,7 +87,7 @@ namespace Template
 
         public Plane(Vector3 n, Vector3 pos, Color3 color) : base(pos, color)
         {
-            N = n;
+            N = Vector3.Normalize(n);
             Pos = pos;
         }
 
@@ -85,9 +98,20 @@ namespace Template
         )
         { }
 
-        public override bool Intersect(Vector3 ray, Vector3 origin)
+        public override Intersection Intersect(Vector3 direction, Vector3 origin)
         {
-            throw new NotImplementedException();
+            // Neemt aan dat de ray de !genormaliseerde! richtings vector + p0 is
+            // Vul P(t) = E + t*d in bij (P(t) - P0) * n^ = 0 en los op voor t
+            float t = Vector3.Dot(this.Pos - origin, this.N)/Vector3.Dot(direction, this.N);
+
+            if (t > 0) {
+                Vector3 position = direction * t + origin;
+                return new Intersection(position, t, this, this.N);
+            } else
+            {
+                return null;
+            }
+           
         }
     }
 }

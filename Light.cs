@@ -11,9 +11,9 @@ namespace Template
         public Vector3 Pos { get; set; }
 
         // Intensity of point light (I = (r, g, b))
-        public Vector3 Intensity { get; set; }
+        public Color3 Intensity { get; set; }
 
-        public Light(Vector3 pos, Vector3 intensity)
+        public Light(Vector3 pos, Color3 intensity)
         {
             Pos = pos;
             Intensity = intensity;
@@ -21,7 +21,7 @@ namespace Template
 
         public Light(float x, float y, float z, float r, float g, float b) : this(
             new Vector3(x, y, z),
-            new Vector3(r, g, b)
+            new Color3(r, g, b)
         )
         { }
     }

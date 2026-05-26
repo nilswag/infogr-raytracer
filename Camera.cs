@@ -23,20 +23,42 @@ namespace Template
 
         public Vector3[] ImagePlane { get; }
 
-        public Camera(Vector3 pos, Vector3 target, float fov = 90f, float aspectRatio = 4 / 3)
+        public Camera(Vector3 pos, Vector3 target, float fov, float aspectRatio)
         {
             Pos = pos;
             FOV = fov;
             AspectRatio = aspectRatio;
-            ImagePlane = new Vector3[2];
             LookAt(target);
+            ImagePlane = new Vector3[4]; 
+            SetPoints();
         }
+
 
         public void LookAt(Vector3 target)
         {
             Forward = Vector3.Normalize(target - Pos);
             Right = Vector3.Normalize(Vector3.Cross(Vector3.UnitY, Forward));
             Up = Vector3.Normalize(Vector3.Cross(Forward, Right));
+        }
+
+        public void SetPoints()
+        {
+            // Dit is onder aanname dat afstand van de camera tot plane center = 1. Die stellen we dus als vast, waardoor FOV
+            // makkelijk veranderbaar blijft.
+            
+            // 1/2 van breedte/hoogte van image plane:
+            float dx = (float)Math.Tan(FOV / 2.0 * (Math.PI / 180.0));
+            float dy = (float)(dx / AspectRatio);
+
+            // Center
+            Vector3 c = Pos + 1 * Forward; //want d = 1
+
+            // Hoekpunten
+            ImagePlane[0] = c + dy * Up - dx * Right; //topleft
+            ImagePlane[1] = c + dy * Up + dx * Right; //topright
+            ImagePlane[2] = c - dy * Up - dx * Right; //bottomleft
+            ImagePlane[3] = c - dy * Up + dx * Right; //bottom-right
+
         }
     }
 }
