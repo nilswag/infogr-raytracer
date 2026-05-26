@@ -19,27 +19,37 @@ namespace Template
         {
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
             this.screen = screen;
-
-            rayTracer = new Raytracer();
-            camera = new Camera(Vector3.Zero, Vector3.UnitZ, fov: 120f, aspectRatio: 1.6f);
+            camera = new Camera(Vector3.Zero, Vector3.UnitZ, fov: 120f, aspectRatio: screen.width/(float)screen.height);
             scenes = [];
+            rayTracer = new Raytracer(screen, camera, new RTScene([], [])); //empty scene untill loaded differently
         }
 
         // initialize
         public void Init()
         {
             // (optional) example of how you can load a triangle mesh in any file format supported by Assimp
-            object? mesh = Util.ImportMesh("../../../assets/cube.obj");
+            object? mesh = Util.ImportMesh("assets/cube.obj"); //had to change it to this otherwise it wouldnt run...
 
             scenes["basic"] = new RTScene(
-                [], // array van lights, is voor nu leeg gezien we er niks mee doen
+                [
+                    //         x   y   z   r   g   b
+                    new Light(-2f, 3f, 5f, 100f, 100f, 100f),
+                    new Light(5f, 3f, 5f, 100f, 100f, 100f)
+                ],
                 [
                     //          x   y   z   r    red  green blue
-                    new Sphere(-5f, 0f, 10f, 2f, 255f, 0f, 0f),
-                    new Sphere(0f, 0f, 10f, 2f, 0f, 255, 0f),
-                    new Sphere(5f, 0f, 10f, 2f, 0f, 0f, 255f)
+                    new Sphere(-5f, 0f, 10f, 2f, 1f, 0f, 0f),
+                    new Sphere(0f, 0f, 10f, 2f, 0f, 1f, 0f),
+                    new Sphere(5f, 0f, 10f, 2f, 0f, 0f, 1f), 
+                    //        nx  ny  nz  px  py  pz  red   green blue
+                    new Plane(0f, 1f, 0f, 0f, -5f, 0f, 0.5f, 0.5f, 0.5f)
                 ]
             );
+
+            // TODO: possibly more scene initializations
+
+            //TODO: Maybe allow users to pick scene --> method?
+            rayTracer.Scene = scenes["basic"];
         }
 
         // tick: renders one frame
@@ -52,7 +62,7 @@ namespace Template
 
             screen.Clear(0);
 
-            rayTracer.Render(scenes["basic"], camera, screen);
+            rayTracer.Render();
 
             deltaTime += timer.Elapsed;
             frames++;

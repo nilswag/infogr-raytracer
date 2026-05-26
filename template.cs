@@ -96,7 +96,7 @@ namespace Template
                 GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
                 GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
                 // Vertex Shader
-                string shaderSource = File.ReadAllText("../../../shaders/screen_vs.glsl");
+                string shaderSource = File.ReadAllText("shaders/screen_vs.glsl"); //had to change it to this path otherwise it wouldnt run... 
                 int vertexShader = GL.CreateShader(ShaderType.VertexShader);
                 GL.ShaderSource(vertexShader, shaderSource);
                 GL.CompileShader(vertexShader);
@@ -107,7 +107,7 @@ namespace Template
                     throw new Exception($"Error occurred whilst compiling vertex shader ({vertexShader}):\n{log}");
                 }
                 // Fragment Shader
-                shaderSource = File.ReadAllText("../../../shaders/screen_fs.glsl");
+                shaderSource = File.ReadAllText("shaders/screen_fs.glsl"); //had to change it to this path otherwise it wouldnt run... 
                 int fragmentShader = GL.CreateShader(ShaderType.FragmentShader);
                 GL.ShaderSource(fragmentShader, shaderSource);
                 GL.CompileShader(fragmentShader);
