@@ -1,4 +1,5 @@
 ﻿using Assimp;
+using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
@@ -15,11 +16,29 @@ namespace Template
         
         // Kleur van primitive
         public Color3 Color { get; set; }
+        // Kleur van glossy primitive
+        public Color3 SpecularColor { get; set; }
+        // Specularity van glossy primitive
+        public int Specularity { get; set; }
+        // Kleur van mirror primitive
+        public Color3 MirrorColor { get; set; }
 
         public Primitive(Vector3 pos, Color3 color)
         {
             Pos = pos;
             Color = color;
+            SpecularColor = new Color3(0, 0, 0);;
+            Specularity = 1;
+            MirrorColor = new Color3(0, 0, 0);
+        }
+
+        public Primitive(Vector3 pos, Color3 color, Color3 specularColor, int specularity, Color3 mirrorColor)
+        {
+            Pos = pos;
+            Color = color;
+            SpecularColor = specularColor;
+            Specularity = specularity;
+            MirrorColor = mirrorColor;
         }
 
         // Overridable function voor intersection
@@ -42,6 +61,22 @@ namespace Template
             new Vector3(x, y, z),
             radius,
             new Color3(r, g, b)
+        )
+        { }
+
+        public Sphere(Vector3 pos, float radius, Color3 color, Color3 specularColor, int specularity, Color3 mirrorColor) : base(pos, color, specularColor, specularity, mirrorColor)
+        {
+            Pos = pos;
+            Radius = radius;
+        }
+
+        public Sphere(float x, float y, float z, float radius, float r, float g, float b, float rs, float gs, float bs, int spec, float rm, float gm, float bm) : this(
+            new Vector3(x, y, z),
+            radius,
+            new Color3(r, g, b),
+            new Color3(rs, gs, bs),
+            spec,
+            new Color3(rm, gm, bm)
         )
         { }
 
@@ -95,6 +130,22 @@ namespace Template
             new Vector3(x, y, z),
             new Vector3(ux, uy, uz),
             new Color3(r, g, b)
+        )
+        { }
+
+        public Plane(Vector3 n, Vector3 pos, Color3 color, Color3 specularColor, int specularity, Color3 mirrorColor) : base(pos, color, specularColor, specularity, mirrorColor)
+        {
+            N = Vector3.Normalize(n);
+            Pos = pos;
+        }
+
+        public Plane(float x, float y, float z, float ux, float uy, float uz, float r, float g, float b, float rs, float gs, float bs, int spec, float rm, float gm, float bm) : this(
+            new Vector3(x, y, z),
+            new Vector3(ux, uy, uz),
+            new Color3(r, g, b), 
+            new Color3(rs, gs, bs),
+            spec,
+            new Color3(rm, gm, bm)
         )
         { }
 
