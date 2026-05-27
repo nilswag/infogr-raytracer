@@ -5,6 +5,7 @@ using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Reflection;
 using System.Reflection.Metadata;
 using System.Text;
 
@@ -16,6 +17,7 @@ namespace Template
         // Werkt nu voor matte oppervlakken 
         // TODO: Laat het werken voor glossy primitives en gemixte (wss moet primitive class ook wat extra members dan)
         // TODO: Laat het werken voor spiegels
+        // TODO: adapt the normal?
 
         // Surface waar de raytracer op gaat werken
         public Surface Surf { get; set; }
@@ -31,6 +33,7 @@ namespace Template
 
         float epsilon = 0.0001f;
 
+        int depth_max = 8;
 
         public Raytracer(Surface surf, Camera camera, RTScene scene)
         {
@@ -56,56 +59,76 @@ namespace Template
                     float a = (x+0.5f)/Surf.width;
                     float b = (y+0.5f)/Surf.height;
                     Vector3 planePoint = Camera.ImagePlane[0] + a * u + b * v;
-                    Vector3 direction = planePoint - Camera.Pos;
+                    Vector3 direction = Vector3.Normalize(planePoint - Camera.Pos);
                     
-                    //Finding the closest intersection
-                    Intersection closestInter = new Intersection(Camera.Pos, float.PositiveInfinity, new Plane(Camera.Pos, Camera.Pos, new Color3(0f, 0f, 0f)), Camera.Pos); //random values
-                    foreach (var obj in Scene.Primitives)
-                    {
-                        Intersection inter = obj.Intersect(Vector3.Normalize(direction), Camera.Pos);
-                        if (inter != null && inter.Dist < closestInter.Dist)
-                        {
-                            closestInter = inter;
-                        }
-                    }
-
-                    //Shading this intersection correctly, but only if one was found.
-                    Color3 color = new Color3(0f, 0f, 0f);
-                    if(closestInter.Dist < float.PositiveInfinity)
-                    {
-                        Color3 primColor = closestInter.Prim.Color;
-                        color = AmbientLight * primColor; //Add ambient lighting as base
-
-                        //Go through all lights in the scene, and add their effects.
-                        foreach (var light in Scene.Lights)
-                        {
-                            Vector3 shadowRay = light.Pos - closestInter.Pos;
-                            bool hits = false;
-
-                            //Check if the shadowray hits obstacle on the way to light
-                            foreach (var obstacle in Scene.Primitives){
-                                Intersection hit = obstacle.Intersect(shadowRay, closestInter.Pos);
-                                float totalLength = (light.Pos - closestInter.Pos).Length;
-                                if (hit != null && epsilon < hit.Dist && hit.Dist < totalLength - epsilon)
-                                {
-                                    hits = true;
-                                }
-                            
-                            }
-
-                            //If no obstacle was hit, calculate the color of the pixel with the lights effects
-                            if (!hits)
-                            {
-                                float radiusSquared = (light.Pos-closestInter.Pos).Length * (light.Pos-closestInter.Pos).Length;
-                                Vector3 lightDirection = Vector3.Normalize(light.Pos - closestInter.Pos);
-                                color += (light.Intensity/radiusSquared) * primColor * MathF.Max(0, Vector3.Dot(closestInter.Norm, lightDirection));
-                            }
-                        }
-                        
-                    }
-                    Surf.Plot(x, y, color);
+                    Surf.Plot(x, y, TraceRay(direction, Camera.Pos, 1));
                 }
             }
+        }
+
+        public Color3 TraceRay(Vector3 direction, Vector3 origin, int depth)
+        {
+            //Finding the closest intersection
+            Intersection closestInter = new Intersection(Camera.Pos, float.PositiveInfinity, new Plane(Camera.Pos, Camera.Pos, new Color3(0f, 0f, 0f)), Camera.Pos); //random values
+            foreach (var obj in Scene.Primitives)
+            {
+                Intersection inter = obj.Intersect(direction, origin);
+                if (inter != null && inter.Dist < closestInter.Dist)
+                {
+                    closestInter = inter;
+                }
+            }
+
+            //Shading this intersection correctly, but only if one was found.
+            Color3 color = new Color3(0f, 0f, 0f); //black as basis
+            if(closestInter.Dist < float.PositiveInfinity)
+            {
+
+                Color3 kd = closestInter.Prim.Color;
+                Color3 ks = closestInter.Prim.SpecularColor;
+                Color3 km = closestInter.Prim.MirrorColor;
+                int spec = closestInter.Prim.Specularity;
+
+                //If the intersection object is a mirror, shoot the reflected ray with recursion
+                if(!km.Equals(new Color3(0f, 0f, 0f)) && depth < depth_max)
+                {
+                    Vector3 n = closestInter.Norm;
+                    Vector3 reflection = direction - 2 * n * Vector3.Dot(direction, n);
+                    color += km * TraceRay(reflection, closestInter.Pos, depth + 1);                    
+                }
+
+                color += AmbientLight * kd; //Add ambient lighting 
+
+                //Go through all lights in the scene, and add their effects.
+                foreach (var light in Scene.Lights)
+                {  
+                    Vector3 shadowRay = Vector3.Normalize(light.Pos - closestInter.Pos);
+                    bool hits = false;
+
+                    //Check if the shadowray hits obstacle on the way to light
+                    foreach (var obstacle in Scene.Primitives){
+                        Intersection hit = obstacle.Intersect(shadowRay, closestInter.Pos);
+                        float totalLength = (light.Pos - closestInter.Pos).Length;
+                        if (hit != null && epsilon < hit.Dist && hit.Dist < totalLength - epsilon)
+                        {
+                            hits = true;
+                        }
+                    
+                    }
+                    //If no obstacle was hit, calculate the color of the pixel with the lights effects
+                    if (!hits)
+                    {
+                        float radiusSquared = (light.Pos-closestInter.Pos).Length * (light.Pos-closestInter.Pos).Length;
+                        Vector3 n = closestInter.Norm;
+                        Vector3 reflection = shadowRay - 2 * n * Vector3.Dot(shadowRay, n);
+                        color += (light.Intensity/radiusSquared) * 
+                         (kd * MathF.Max(0, Vector3.Dot(closestInter.Norm, shadowRay)) + 
+                         ks * MathF.Max(0, MathF.Pow(Vector3.Dot(direction, reflection), spec)));
+                    }
+
+                }  
+            }
+            return color;       
         }
     }
 }

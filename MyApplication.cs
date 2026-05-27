@@ -1,4 +1,5 @@
 using OpenTK.Mathematics;
+using SixLabors.ImageSharp.Formats.Pbm;
 using System.Diagnostics;
 using System.Globalization;
 
@@ -33,16 +34,18 @@ namespace Template
             scenes["basic"] = new RTScene(
                 [
                     //         x   y   z   r   g   b
-                    new Light(-2f, 3f, 5f, 100f, 100f, 100f),
+                    new Light(-8f, 5f, 5f, 100f, 100f, 100f),
                     new Light(5f, 3f, 5f, 100f, 100f, 100f)
                 ],
                 [
-                    //          x   y   z   r    red  green blue
-                    new Sphere(-5f, 0f, 10f, 2f, 1f, 0f, 0f),
-                    new Sphere(0f, 0f, 10f, 2f, 0f, 1f, 0f),
-                    new Sphere(5f, 0f, 10f, 2f, 0f, 0f, 1f), 
+                    //          x   y   z    rd   r   g   b  rs   gs   bs spec rm  gm  bm
+                    new Sphere(-5f, 0f, 13f, 2f, 1f, 0f, 0f, 1f, 0.5f, 0f, 10, 0f, 0f, 0f),
+                    new Sphere(0f, 0f, 12f, 2f, 0f, 1f, 0f, 0.3f, 0.5f, 0f, 10, 0.5f, 0.5f, 0.5f),
+                    new Sphere(5f, 0f, 14f, 2f, 0f, 0f, 0f, 0f, 0f, 0f, 1, 1f, 1f, 1f), 
+                    new Sphere(5f, 0f, 0f, 2f, 0f, 0f, 1f, 0f, 0f, 0f, 1, 0f, 0f, 0f), 
                     //        nx  ny  nz  px  py  pz  red   green blue
-                    new Plane(0f, 1f, 0f, 0f, -5f, 0f, 0.5f, 0.5f, 0.5f)
+                    new Plane(0f, 1f, 0f, 0f, -5f, 0f, 0.5f, 0.5f, 0.5f),
+                    new Plane(0f, 0f, -1f, 0f, 0f, 25f, 0.3f, 0.2f, 0.5f, 0.2f, 0.2f, 0.2f, 10, 0f, 0f, 0f)
                 ]
             );
 
