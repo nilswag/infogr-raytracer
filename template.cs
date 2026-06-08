@@ -175,6 +175,22 @@ namespace Template
             // called once per frame; app logic
             var keyboard = KeyboardState;
             if (keyboard[Keys.Escape]) terminated = true;
+            
+            // handles camera movement as well as target change
+            if (keyboard.IsKeyPressed(Keys.Left)) app?.PreviousTarget();
+            if (keyboard.IsKeyPressed(Keys.Right)) app?.NextTarget();
+
+            float moveStep = 0.5f;
+            if (keyboard[Keys.W]) app?.MoveCamera(new Vector3(0f, 0f,  moveStep));
+            if (keyboard[Keys.S]) app?.MoveCamera(new Vector3(0f, 0f, -moveStep));
+            if (keyboard[Keys.A]) app?.MoveCamera(new Vector3(-moveStep, 0f, 0f));
+            if (keyboard[Keys.D]) app?.MoveCamera(new Vector3( moveStep, 0f, 0f));
+            if (keyboard[Keys.Q]) app?.MoveCamera(new Vector3(0f, -moveStep, 0f));
+            if (keyboard[Keys.E]) app?.MoveCamera(new Vector3(0f,  moveStep, 0f));
+
+            // changes the fov by 2 degrees
+            if (keyboard[Keys.Z]) app?.AdjustFOV(-2f);
+            if (keyboard[Keys.X]) app?.AdjustFOV( 2f);
         }
         protected override void OnRenderFrame(FrameEventArgs e)
         {
