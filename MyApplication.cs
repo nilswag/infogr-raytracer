@@ -30,25 +30,32 @@ class MyApplication
     // initialize
     public void Init()
     {
-        // (optional) example of how you can load a triangle mesh in any file format supported by Assimp
-        // object? mesh = Util.ImportMesh("assets/cube.obj"); //had to change it to this otherwise it wouldnt run...
+        //(optional) example of how you can load a triangle mesh in any file format supported by Assimp
+        MeshT mesh = Util.ImportMesh("assets/cube.obj");
 
         scenes["basic"] = new RTScene(
         [
-                    //         x   y   z   r   g   b
-            new Light(-8f, 5f, 5f, 100f, 100f, 100f),
-            new Light(5f, 3f, 5f, 100f, 100f, 100f)
+                    //  position                    color/intensity             //direction            //cutoff
+            new Light(new Vector3(-8f, 5f, 5f), new Color3(100f, 100f, 100f)),
+            new Light(new Vector3(-10f, 3f, 5f), new Color3(100f, 100f, 100f), new Vector3(2f, -2f, 5f), 0.95f)
         ],
         [
-                    //          x   y   z    rd   r   g   b  rs   gs   bs spec rm  gm  bm
-            new Sphere(-5f, 0f, 13f, 2f, 1f, 0f, 0f, 1f, 0.5f, 0f, 10, 0f, 0f, 0f),
-            new Sphere(0f, 0f, 12f, 2f, 0f, 1f, 0f, 0.3f, 0.5f, 0f, 10, 0.5f, 0.5f, 0.5f),
-            new Sphere(5f, 0f, 14f, 2f, 0f, 0f, 0f, 0f, 0f, 0f, 1, 1f, 1f, 1f),
-            new Sphere(5f, 0f, 0f, 2f, 0f, 0f, 1f, 0f, 0f, 0f, 1, 0f, 0f, 0f),
-                    //        nx  ny  nz  px  py  pz  red   green blue
-            new Plane(0f, 1f, 0f, 0f, -5f, 0f, 0.5f, 0.5f, 0.5f),
-            new Plane(0f, 0f, -1f, 0f, 0f, 25f, 0.3f, 0.2f, 0.5f, 0.2f, 0.2f, 0.2f, 10, 0f, 0f, 0f)
+                    //  center                   radius     color                 specularcolor     specularity   mirrorcolor
+            new Sphere(new Vector3(-5f, 0f, 13f), 2f, new Color3(1f, 0f, 0f), new Color3(1f, 0.5f, 0f), 10, new Color3(0f, 0f, 0f)),
+            new Sphere(new Vector3(0f, 0f, 12f), 2f, new Color3(0f, 1f, 0f), new Color3(0.3f, 0.5f, 0f), 10, new Color3(0.5f, 0.5f, 0.5f)),
+            new Sphere(new Vector3(5f, 0f, 14f), 2f, new Color3(0f, 0f, 0f), new Color3(0f, 0f, 0f), 1, new Color3(1f, 1f, 1f)),
+            new Sphere(new Vector3(5f, 0f, 0f), 2f, new Color3(0f, 0f, 1f), new Color3(0f, 0f, 0f), 1, new Color3(0f, 0f, 0f)),
+                    //    normal                    position                    color                       specularcolor           specularity     mirrorcolor
+            new Plane(new Vector3(0f, 1f, 0f), new Vector3(0f, -5f, 0f), new Color3(0.5f, 0.5f, 0.5f)),
+            new Plane(new Vector3(0f, 0f, -1f), new Vector3(0f, 0f, 25f), new Color3(0.3f, 0.2f, 0.5f), new Color3(0.2f, 0.2f, 0.2f), 10, new Color3(0f, 0f, 0f)),
+                    //      
+            new Triangle(new Vector3(-10f, -3f, 13f), new Vector3(-15f, 0f, 13f), new Vector3(-8f, 5f, 13f), new Color3(1f, 0f, 0f))
         ]);
+
+        foreach(Triangle tr in mesh.Triangles)
+        {
+            scenes["basic"].Primitives.Add(tr);
+        }
 
         // TODO: possibly more scene initializations
 

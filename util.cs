@@ -23,26 +23,18 @@ namespace Template
         // currently merges all sub-meshes in the file into one big result mesh
         // currently doesn't support materials, separate sub-meshes, or animations
         // TODO: insert your code to finish converting Assimp's internal data to your own mesh class
-        private static bool disableWarning = false;
-        public static object? ImportMesh(string filename)
+        public static MeshT ImportMesh(string filename)
         {
-            if (!disableWarning)
-            {
-                Console.WriteLine("(optional) To load triangle meshes, complete the TODOs in util.cs");
-                disableWarning = true;
-            }
-            // TODO: create an instance of your own mesh class (a collection of triangles)
-            object? result = null;
-
+            MeshT result = new MeshT();
             AssimpContext importer = new();
             Scene model = importer.ImportFile(filename, PostProcessSteps.Triangulate);
             Node node = model.RootNode;
             Matrix4 prev = Matrix4.Identity;
-            ImportMesh(model, node, prev, ref result);
+            ImportMesh(model, node, prev, result);
 
             return result;
         }
-        private static void ImportMesh(Scene model, Node node, Matrix4 prev, ref object? result)
+        private static void ImportMesh(Scene model, Node node, Matrix4 prev, MeshT result)
         {
             Matrix4 transform = Matrix4.Mult(prev, node.Transform.ToOpenTK());
             Matrix3 normalTransform = new Matrix3(transform).Inverted().Transposed();
@@ -57,29 +49,29 @@ namespace Template
                         Vector3 p1 = (transform * new Vector4(mesh.Vertices[face.Indices[0]].ToOpenTK(), 1)).Xyz;
                         Vector3 p2 = (transform * new Vector4(mesh.Vertices[face.Indices[1]].ToOpenTK(), 1)).Xyz;
                         Vector3 p3 = (transform * new Vector4(mesh.Vertices[face.Indices[2]].ToOpenTK(), 1)).Xyz;
-                        Vector3? n1 = null, n2 = null, n3 = null;
-                        if (mesh.HasNormals)
+                        Triangle tri = new Triangle(p1, p2, p3, new Color3(0.5f, 0.5f, 0.5f)); //add color choice?
+                        if (mesh.HasNormals && hasTexCoords)
                         {
-                            n1 = normalTransform * mesh.Normals[face.Indices[0]].ToOpenTK();
-                            n2 = normalTransform * mesh.Normals[face.Indices[1]].ToOpenTK();
-                            n3 = normalTransform * mesh.Normals[face.Indices[2]].ToOpenTK();
+                            tri.NA = normalTransform * mesh.Normals[face.Indices[0]].ToOpenTK();
+                            tri.NB = normalTransform * mesh.Normals[face.Indices[1]].ToOpenTK();
+                            tri.NC = normalTransform * mesh.Normals[face.Indices[2]].ToOpenTK();
                         }
-                        Vector2? uv1 = null, uv2 = null, uv3 = null;
                         if (hasTexCoords)
                         {
                             Vector2 offset = new(0, 1);
                             Vector2 scale = new(1, -1);
-                            uv1 = mesh.TextureCoordinateChannels[0][face.Indices[0]].ToOpenTK().Xy * scale + offset;
-                            uv2 = mesh.TextureCoordinateChannels[0][face.Indices[1]].ToOpenTK().Xy * scale + offset;
-                            uv3 = mesh.TextureCoordinateChannels[0][face.Indices[2]].ToOpenTK().Xy * scale + offset;
+                            tri.UVA = mesh.TextureCoordinateChannels[0][face.Indices[0]].ToOpenTK().Xy * scale + offset;
+                            tri.UVB = mesh.TextureCoordinateChannels[0][face.Indices[1]].ToOpenTK().Xy * scale + offset;
+                            tri.UVC = mesh.TextureCoordinateChannels[0][face.Indices[2]].ToOpenTK().Xy * scale + offset;
+                            
                         }
-                        // TODO: create an instance of your own triangle class and add it to the result
+                        result.Triangles.Add(tri);
                     }
                 }
             }
             for (int i = 0; i < node.ChildCount; i++)
             {
-                ImportMesh(model, node.Children[i], transform, ref result);
+                ImportMesh(model, node.Children[i], transform, result);
             }
         }
     }
