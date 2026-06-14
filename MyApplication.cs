@@ -80,6 +80,8 @@ class MyApplication
     {
         camera.FOV = Math.Clamp(camera.FOV + delta, 20f, 150f);
         camera.SetPoints();
+
+        rayTracer.Refresh();
     }
 
     private void UpdateCameraTarget()
@@ -89,6 +91,8 @@ class MyApplication
         targetPrimitiveIndex = Math.Clamp(targetPrimitiveIndex, 0, rayTracer.Scene.Primitives.Count - 1);
         camera.LookAt(rayTracer.Scene.Primitives[targetPrimitiveIndex].Pos);
         camera.SetPoints();
+
+        rayTracer.Refresh();
     }
 
     // tick: renders one frame
@@ -100,7 +104,7 @@ class MyApplication
     {
         timer.Restart();
 
-        screen.Clear(0);
+        //screen.Clear(0);
 
         rayTracer.Render();
 

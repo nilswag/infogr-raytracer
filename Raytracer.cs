@@ -32,11 +32,29 @@ namespace Template
 
         int depth_max = 8;
 
+        int[] pixelOrder;
+        int currentPixel = 0;
+        int pixelsPerFrame = 21954;
+
         public Raytracer(Surface surf, Camera camera, RTScene scene)
         {
             Surf = surf;
             Camera = camera;
             Scene = scene;
+
+            pixelOrder = Enumerable.Range(0, surf.width * surf.height).ToArray();
+            var rng = new Random();
+            for (int i = pixelOrder.Length - 1; i > 0; i--)
+            {
+                int j = rng.Next(i + 1);
+                (pixelOrder[i], pixelOrder[j]) = (pixelOrder[j], pixelOrder[i]);
+            }
+        }
+
+        public void Refresh()
+        {
+            currentPixel = 0;
+            Surf.Clear(0);
         }
 
         public void Render()
@@ -49,30 +67,36 @@ namespace Template
             Vector3 u = Camera.ImagePlane[1] - Camera.ImagePlane[0];
             Vector3 v = Camera.ImagePlane[2] - Camera.ImagePlane[0];
 
-            for (int x = 0; x < Surf.width; x++)
+            int start = currentPixel;
+            int end = Math.Min(currentPixel + pixelsPerFrame, pixelOrder.Length);
+
+            Parallel.For(start, end, n =>
             {
-                for (int y = 0; y < Surf.height; y++)
-                {
-                    
-                    //Now loop through grid of 9 rays and average the color
-                    Color3 color = new Color3(0,0,0);
+                int idx = pixelOrder[n];
+                int x = idx % Surf.width;
+                int y = idx / Surf.width;
 
-                    for(float i = 0f; i <= 1f; i=i+0.5f)
-                        for(float j = 0f; j <= 1f; j = j + 0.5f)
-                        {
-                            float a = (x+i)/Surf.width;
-                            float b = (y+j)/Surf.height;
-                            
-                            Vector3 planePoint = Camera.ImagePlane[0] + a * u + b * v;
-                            Vector3 direction = Vector3.Normalize(planePoint - Camera.Pos);
+                //Now loop through grid of 9 rays and average the color
+                Color3 color = new Color3(0, 0, 0);
 
-                            color += TraceRay(direction, Camera.Pos, 1);
-                        }
+                for (float i = 0f; i <= 1f; i = i + 0.5f)
+                    for (float j = 0f; j <= 1f; j = j + 0.5f)
+                    {
+                        float a = (x + i) / Surf.width;
+                        float b = (y + j) / Surf.height;
 
-                    
-                    Surf.Plot(x, y, color/9);
-                }
-            }
+                        Vector3 planePoint = Camera.ImagePlane[0] + a * u + b * v;
+                        Vector3 direction = Vector3.Normalize(planePoint - Camera.Pos);
+
+                        color += TraceRay(direction, Camera.Pos, 1);
+                    }
+
+                Surf.Plot(x, y, color / 9);
+            });
+
+            currentPixel = end;
+            if (currentPixel >= pixelOrder.Length)
+                currentPixel = 0;
         }
 
         public Color3 TraceRay(Vector3 direction, Vector3 origin, int depth)
