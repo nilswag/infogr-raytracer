@@ -73,6 +73,7 @@ namespace Template
         protected override void OnLoad()
         {
             base.OnLoad();
+            CursorState = CursorState.Normal;
             // called during application initialization
             GL.ClearColor(0, 0, 0, 0);
             GL.Disable(EnableCap.DepthTest);
@@ -176,21 +177,39 @@ namespace Template
             var keyboard = KeyboardState;
             if (keyboard[Keys.Escape]) terminated = true;
             
+            var mouse = MouseState;
+            if (KeyboardState.IsKeyPressed(Keys.Escape))
+                CursorState = CursorState.Normal;
+
+            bool looking = mouse.IsButtonDown(MouseButton.Right);
+
+            CursorState = looking ? CursorState.Grabbed : CursorState.Normal;
+
+            if (app != null && IsFocused && looking)
+            {
+                float sensitivity = 0.1f;
+                app.RotateCamera(mouse.Delta.X * sensitivity, -mouse.Delta.Y * sensitivity);
+            }
+
             // handles camera movement as well as target change
             if (keyboard.IsKeyPressed(Keys.Left)) app?.PreviousTarget();
             if (keyboard.IsKeyPressed(Keys.Right)) app?.NextTarget();
 
             float moveStep = 0.5f;
-            if (keyboard[Keys.W]) app?.MoveCamera(new Vector3(0f, 0f,  moveStep));
-            if (keyboard[Keys.S]) app?.MoveCamera(new Vector3(0f, 0f, -moveStep));
-            if (keyboard[Keys.A]) app?.MoveCamera(new Vector3(-moveStep, 0f, 0f));
-            if (keyboard[Keys.D]) app?.MoveCamera(new Vector3( moveStep, 0f, 0f));
-            if (keyboard[Keys.Q]) app?.MoveCamera(new Vector3(0f, -moveStep, 0f));
-            if (keyboard[Keys.E]) app?.MoveCamera(new Vector3(0f,  moveStep, 0f));
 
-            // changes the fov by 2 degrees
-            if (keyboard[Keys.Z]) app?.AdjustFOV(-2f);
-            if (keyboard[Keys.X]) app?.AdjustFOV( 2f);
+            if (app != null)
+            {
+                Vector3 forward = app.GetForward();
+                Vector3 right = app.GetRight();
+                Vector3 up = Vector3.UnitY;
+
+                if (keyboard[Keys.W]) app.MoveCamera(forward * moveStep);
+                if (keyboard[Keys.S]) app.MoveCamera(-forward * moveStep);
+                if (keyboard[Keys.A]) app.MoveCamera(-right * moveStep);
+                if (keyboard[Keys.D]) app.MoveCamera(right * moveStep);
+                if (keyboard[Keys.Q]) app.MoveCamera(-up * moveStep);
+                if (keyboard[Keys.E]) app.MoveCamera(up * moveStep);
+            }
         }
         protected override void OnRenderFrame(FrameEventArgs e)
         {
