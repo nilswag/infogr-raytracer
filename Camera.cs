@@ -3,62 +3,74 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Template
+namespace Template;
+
+public class Camera
 {
-    public class Camera
+    public Vector3 Pos { get; set; }
+
+    public Vector3 Forward { get; private set; }
+    public Vector3 Right { get; private set; }
+    public Vector3 Up { get; private set; }
+
+    public float FOV { get; set; }
+    public float AspectRatio { get; set; }
+
+    public float Yaw { get; private set; }
+    public float Pitch { get; private set; }
+
+    public Vector3[] ImagePlane { get; }
+
+    public Camera(Vector3 pos, Vector3 forward, float fov, float aspectRatio)
     {
-        // Positie van camera
-        public Vector3 Pos { get; set; }
+        Pos = pos;
+        FOV = fov;
+        AspectRatio = aspectRatio;
+        ImagePlane = new Vector3[4];
 
-        // Richting van camera
-        public Vector3 Forward { get; set; }
-        public Vector3 Right { get; set; }
-        public Vector3 Up { get; set; }
+        Forward = Vector3.Normalize(forward);
+        Yaw = MathHelper.RadiansToDegrees(MathF.Atan2(Forward.Z, Forward.X));
+        Pitch = MathHelper.RadiansToDegrees(MathF.Asin(Forward.Y));
 
-        // FOV in graden
-        public float FOV { get; set; }
+        UpdateVectors();
+        SetPoints();
+    }
 
-        // Aspect ratio
-        public float AspectRatio { get; set; }
+    public void Rotate(float yawDelta, float pitchDelta)
+    {
+        Yaw += yawDelta;
+        Pitch += pitchDelta;
+        Pitch = Math.Clamp(Pitch, -89f, 89f);
 
-        public Vector3[] ImagePlane { get; }
+        UpdateVectors();
+        SetPoints();
+    }
 
-        public Camera(Vector3 pos, Vector3 target, float fov, float aspectRatio)
-        {
-            Pos = pos;
-            FOV = fov;
-            AspectRatio = aspectRatio;
-            LookAt(target);
-            ImagePlane = new Vector3[4]; 
-            SetPoints();
-        }
+    private void UpdateVectors()
+    {
+        float yawRad = MathHelper.DegreesToRadians(Yaw);
+        float pitchRad = MathHelper.DegreesToRadians(Pitch);
 
+        Vector3 forward;
+        forward.X = MathF.Cos(yawRad) * MathF.Cos(pitchRad);
+        forward.Y = MathF.Sin(pitchRad);
+        forward.Z = MathF.Sin(yawRad) * MathF.Cos(pitchRad);
 
-        public void LookAt(Vector3 target)
-        {
-            Forward = Vector3.Normalize(target - Pos);
-            Right = Vector3.Normalize(Vector3.Cross(Vector3.UnitY, Forward));
-            Up = Vector3.Normalize(Vector3.Cross(Forward, Right));
-        }
+        Forward = Vector3.Normalize(forward);
+        Right = Vector3.Normalize(Vector3.Cross(Forward, Vector3.UnitY));
+        Up = Vector3.Normalize(Vector3.Cross(Right, Forward));
+    }
 
-        public void SetPoints()
-        {
-            // Dit is onder aanname dat afstand van de camera tot plane center = 1. Die stellen we dus als vast, waardoor FOV
-            // makkelijk veranderbaar blijft.
-            
-            // 1/2 van breedte/hoogte van image plane:
-            float dx = (float)Math.Tan(FOV / 2.0 * (Math.PI / 180.0));
-            float dy = (float)(dx / AspectRatio);
+    public void SetPoints()
+    {
+        float dx = (float)Math.Tan(FOV / 2.0 * (Math.PI / 180.0));
+        float dy = dx / AspectRatio;
 
-            // Center
-            Vector3 c = Pos + 1 * Forward; //want d = 1
+        Vector3 c = Pos + Forward;
 
-            // Hoekpunten
-            ImagePlane[0] = c + dy * Up - dx * Right; //topleft
-            ImagePlane[1] = c + dy * Up + dx * Right; //topright
-            ImagePlane[2] = c - dy * Up - dx * Right; //bottomleft
-            ImagePlane[3] = c - dy * Up + dx * Right; //bottom-right
-
-        }
+        ImagePlane[0] = c + dy * Up - dx * Right;
+        ImagePlane[1] = c + dy * Up + dx * Right;
+        ImagePlane[2] = c - dy * Up - dx * Right;
+        ImagePlane[3] = c - dy * Up + dx * Right;
     }
 }

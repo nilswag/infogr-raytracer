@@ -8,11 +8,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AssimpNet" Version="4.1.0" />
+    <PackageReference Include="AssimpNetter" Version="5.4.3.1" />
     <PackageReference Include="OpenTK" Version="4.9.4" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(OS)' == 'Unix'">
+  <None Include="/opt/homebrew/opt/assimp/lib/libassimp.dylib">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <Link>libassimp.dylib</Link>
+  </None>
+  </ItemGroup>
 	<ItemGroup>
 		<None Update="assets\**\*">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -61,9 +61,16 @@ class MyApplication
 
         //TODO: Maybe allow users to pick scene --> method?
         rayTracer.Scene = scenes["basic"];
-        UpdateCameraTarget();
+        camera.SetPoints();
     }
 
+    public void RotateCamera(float yawDelta, float pitchDelta)
+    {
+        camera.Rotate(yawDelta, pitchDelta);
+    }
+    public Vector3 GetForward() => camera.Forward;
+    public Vector3 GetRight() => camera.Right;
+    public Vector3 GetUp() => camera.Up;
     public void SetTargetPrimitiveIndex(int index)
     {
         targetPrimitiveIndex = index;
@@ -73,7 +80,7 @@ class MyApplication
     public void MoveCamera(Vector3 delta)
     {
         camera.Pos += delta;
-        UpdateCameraTarget();
+        camera.SetPoints();
     }
 
     public void AdjustFOV(float delta)
@@ -89,10 +96,12 @@ class MyApplication
         if (rayTracer.Scene.Primitives.Count == 0) return;
 
         targetPrimitiveIndex = Math.Clamp(targetPrimitiveIndex, 0, rayTracer.Scene.Primitives.Count - 1);
-        camera.LookAt(rayTracer.Scene.Primitives[targetPrimitiveIndex].Pos);
-        camera.SetPoints();
-
-        rayTracer.Refresh();
+        Vector3 target = rayTracer.Scene.Primitives[targetPrimitiveIndex].Pos;
+        Vector3 dir = Vector3.Normalize(target - camera.Pos);
+        camera.Rotate(
+            MathHelper.RadiansToDegrees(MathF.Atan2(dir.Z, dir.X)) - camera.Yaw,
+            MathHelper.RadiansToDegrees(MathF.Asin(dir.Y)) - camera.Pitch
+        );
     }
 
     // tick: renders one frame
