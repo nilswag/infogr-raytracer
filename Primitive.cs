@@ -177,35 +177,51 @@ namespace Template
 
         public override Intersection Intersect(Vector3 direction, Vector3 origin)
         {
+            float dDotN = Vector3.Dot(direction, N);
+
+            if (MathF.Abs(dDotN) < 1e-8f) return null;
+
             // Neemt aan dat de ray de !genormaliseerde! richtings vector + p0 is
             // Vul P(t) = E + t*d in bij (P(t) - P0) * n^ = 0 en los op voor t
-            float t = Vector3.Dot(this.Pos - origin, this.N)/Vector3.Dot(direction, this.N);
+            float t = Vector3.Dot(Pos - origin, N) / dDotN;
+            if (t <= 0f) return null;
 
-            if (t > 0) {
-                Vector3 P = direction * t + origin;
-                Vector3 normal = this.N;
-                // adapt the normal
-                if(Vector3.Dot(normal, direction) > 0) normal*=-1;
+            Vector3 P = origin + direction * t;
 
-                //check whether P is inside triangle, otherwise no intersection
-                if (Vector3.Dot(this.N, Vector3.Cross(B-A, P-A)) < 0) return null;
-                if (Vector3.Dot(this.N, Vector3.Cross(C-B, P-B)) < 0) return null;
-                if (Vector3.Dot(this.N, Vector3.Cross(A-C, P-C)) < 0) return null;
+            Vector3 AB = B - A;
+            Vector3 BC = C - B;
+            Vector3 CA = A - C;
+            Vector3 AP = P - A;
+            Vector3 BP = P - B;
+            Vector3 CP = P - C;
 
-                float alfa = ((Vector3.Cross(C-B, P-B)).Length / 2)/((Vector3.Cross(C-B, A-B)).Length / 2);
-                float beta = ((Vector3.Cross(A-C, P-C)).Length / 2)/((Vector3.Cross(C-B, A-B)).Length / 2);
-                float gamma = 1 - alfa - beta;
-                
-                //normal interpolation
-                Vector3 shadingNormal = Vector3.Normalize(alfa * NA + beta * NB + gamma * NC);
-                if(Vector3.Dot(shadingNormal, direction) > 0) shadingNormal*=-1;
-                //TODO: add texture coordinates also??
+            Vector3 crossAB_AP = Vector3.Cross(AB, AP);
+            Vector3 crossBC_BP = Vector3.Cross(BC, BP);
+            Vector3 crossCA_CP = Vector3.Cross(CA, CP);
 
-                return new Intersection(P, t, this, shadingNormal);
-            } else
-            {
-                return null;
-            }   
+            // half of the magnitude of the cross product of two vectors is equal to the area of the sub-triangle
+            float d0 = Vector3.Dot(N, crossAB_AP); // signed area of parallelogram formed by AB and AP
+            float d1 = Vector3.Dot(N, crossBC_BP); // signed area of parallelogram formed by BC and BP
+            float d2 = Vector3.Dot(N, crossCA_CP); // signed area of parallelogram formed by CA and CP
+            // this also automatically flips the normal correctly
+
+            //check whether P is inside triangle, otherwise no intersection
+            if (d0 < 0f || d1 < 0f || d2 < 0f) return null;
+
+            // there is also no need to calculate the explicit area of the sub triangles for the barycentric coordinates
+            // since the ratio of the cross products remains the same
+            float denom = d0 + d1 + d2; // <---- area of parallelogram formed by any two edges connected by same vertex
+
+            float alfa = d1 / denom;
+            float beta = d2 / denom;
+            float gamma = d0 / denom;
+
+            //normal interpolation
+            Vector3 shadingNormal = Vector3.Normalize(alfa * NA + beta * NB + gamma * NC);
+            if(Vector3.Dot(shadingNormal, direction) > 0) shadingNormal*=-1;
+            //TODO: add texture coordinates also??
+
+            return new Intersection(P, t, this, shadingNormal); 
         }
     }
 }

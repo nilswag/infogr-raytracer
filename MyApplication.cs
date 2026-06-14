@@ -87,6 +87,8 @@ class MyApplication
     {
         camera.FOV = Math.Clamp(camera.FOV + delta, 20f, 150f);
         camera.SetPoints();
+
+        rayTracer.Refresh();
     }
 
     private void UpdateCameraTarget()
@@ -111,7 +113,7 @@ class MyApplication
     {
         timer.Restart();
 
-        screen.Clear(0);
+        //screen.Clear(0);
 
         rayTracer.Render();
 
