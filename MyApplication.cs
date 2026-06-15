@@ -67,6 +67,8 @@ class MyApplication
     public void RotateCamera(float yawDelta, float pitchDelta)
     {
         camera.Rotate(yawDelta, pitchDelta);
+
+        rayTracer.Refresh();
     }
     public Vector3 GetForward() => camera.Forward;
     public Vector3 GetRight() => camera.Right;
@@ -81,14 +83,14 @@ class MyApplication
     {
         camera.Pos += delta;
         camera.SetPoints();
+
+        rayTracer.Refresh();
     }
 
     public void AdjustFOV(float delta)
     {
         camera.FOV = Math.Clamp(camera.FOV + delta, 20f, 150f);
         camera.SetPoints();
-
-        rayTracer.Refresh();
     }
 
     private void UpdateCameraTarget()
