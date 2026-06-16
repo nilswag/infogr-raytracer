@@ -44,7 +44,7 @@ class MyApplication
 
             new Sphere(new Vector3(0f, 0f, 12f), 2f, new Color3(0f, 1f, 0f), new Color3(0.3f, 0.5f, 0f), 10, new Color3(0.5f, 0.5f, 0.5f))
             {
-                Texture = new Texture("assets/bricks.jpg")
+                Texture = new Texture("assets/bricks.jpg", 2.0f)
             },
 
 
