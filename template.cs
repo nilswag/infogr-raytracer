@@ -197,6 +197,9 @@ namespace Template
 
             float moveStep = 0.5f;
 
+            if (keyboard[Keys.Z]) app?.AdjustFOV(-2f);
+            if (keyboard[Keys.X]) app?.AdjustFOV( 2f);
+
             if (app != null)
             {
                 Vector3 forward = app.GetForward();
