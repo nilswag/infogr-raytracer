@@ -32,7 +32,6 @@ class MyApplication
     {
         //(optional) example of how you can load a triangle mesh in any file format supported by Assimp
         MeshT mesh = Util.ImportMesh("assets/cube.obj");
-
         scenes["basic"] = new RTScene(
         [
                     //  position                    color/intensity             //direction            //cutoff
@@ -52,7 +51,7 @@ class MyApplication
             new Triangle(new Vector3(-10f, -3f, 13f), new Vector3(-15f, 0f, 13f), new Vector3(-8f, 5f, 13f), new Color3(1f, 0f, 0f))
         ]);
 
-        foreach(Triangle tr in mesh.Triangles)
+        foreach (Triangle tr in mesh.Triangles)
         {
             scenes["basic"].Primitives.Add(tr);
         }
@@ -116,7 +115,6 @@ class MyApplication
         timer.Restart();
 
         //screen.Clear(0);
-
         rayTracer.Render();
 
         deltaTime += timer.Elapsed;
