@@ -32,7 +32,6 @@ class MyApplication
     {
         //(optional) example of how you can load a triangle mesh in any file format supported by Assimp
         MeshT mesh = Util.ImportMesh("assets/cube.obj");
-
         scenes["basic"] = new RTScene(
         [
                     //  position                    color/intensity             //direction            //cutoff
@@ -42,7 +41,13 @@ class MyApplication
         [
                     //  center                   radius     color                 specularcolor     specularity   mirrorcolor
             new Sphere(new Vector3(-5f, 0f, 13f), 2f, new Color3(1f, 0f, 0f), new Color3(1f, 0.5f, 0f), 10, new Color3(0f, 0f, 0f)),
-            new Sphere(new Vector3(0f, 0f, 12f), 2f, new Color3(0f, 1f, 0f), new Color3(0.3f, 0.5f, 0f), 10, new Color3(0.5f, 0.5f, 0.5f)),
+
+            new Sphere(new Vector3(0f, 0f, 12f), 2f, new Color3(0f, 1f, 0f), new Color3(0.3f, 0.5f, 0f), 10, new Color3(0.5f, 0.5f, 0.5f))
+            {
+                Texture = new Texture("assets/bricks.jpg")
+            },
+
+
             new Sphere(new Vector3(5f, 0f, 14f), 2f, new Color3(0f, 0f, 0f), new Color3(0f, 0f, 0f), 1, new Color3(1f, 1f, 1f)),
             new Sphere(new Vector3(5f, 0f, 0f), 2f, new Color3(0f, 0f, 1f), new Color3(0f, 0f, 0f), 1, new Color3(0f, 0f, 0f)),
                     //    normal                    position                    color                       specularcolor           specularity     mirrorcolor
@@ -52,7 +57,7 @@ class MyApplication
             new Triangle(new Vector3(-10f, -3f, 13f), new Vector3(-15f, 0f, 13f), new Vector3(-8f, 5f, 13f), new Color3(1f, 0f, 0f))
         ]);
 
-        foreach(Triangle tr in mesh.Triangles)
+        foreach (Triangle tr in mesh.Triangles)
         {
             scenes["basic"].Primitives.Add(tr);
         }
@@ -116,7 +121,6 @@ class MyApplication
         timer.Restart();
 
         //screen.Clear(0);
-
         rayTracer.Render();
 
         deltaTime += timer.Elapsed;

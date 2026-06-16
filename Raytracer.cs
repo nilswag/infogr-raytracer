@@ -102,7 +102,7 @@ namespace Template
         public Color3 TraceRay(Vector3 direction, Vector3 origin, int depth)
         {
             //Finding the closest intersection
-            Intersection closestInter = new Intersection(Camera.Pos, float.PositiveInfinity, new Plane(Camera.Pos, Camera.Pos, new Color3(0f, 0f, 0f)), Camera.Pos); //random values
+            Intersection closestInter = new Intersection(Camera.Pos, float.PositiveInfinity, new Plane(Camera.Pos, Camera.Pos, new Color3(0f, 0f, 0f)), Camera.Pos, new Color3(0f, 0f, 0f)); //random values
             foreach (var obj in Scene.Primitives)
             {
                 Intersection inter = obj.Intersect(direction, origin);
@@ -117,7 +117,7 @@ namespace Template
             if(closestInter.Dist < float.PositiveInfinity)
             {
 
-                Color3 kd = closestInter.Prim.Color;
+                Color3 kd = closestInter.Color;
                 Color3 ks = closestInter.Prim.SpecularColor;
                 Color3 km = closestInter.Prim.MirrorColor;
                 int spec = closestInter.Prim.Specularity;
