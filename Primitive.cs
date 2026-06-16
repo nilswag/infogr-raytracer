@@ -11,11 +11,14 @@ namespace Template
         // Kleur van primitive
         public Color3 Color { get; set; }
         // Kleur van glossy primitive
+
         public Color3 SpecularColor { get; set; }
         // Specularity van glossy primitive
         public int Specularity { get; set; }
         // Kleur van mirror primitive
         public Color3 MirrorColor { get; set; }
+
+        public Texture Texture { get; set; }
 
         public Primitive(Vector3 pos, Color3 color)
         {
@@ -25,6 +28,7 @@ namespace Template
             Specularity = 1;
             MirrorColor = new Color3(0, 0, 0);
 
+            Texture = new Texture();
         }
 
         public Primitive(Vector3 pos, Color3 color, Color3 specularColor, int specularity, Color3 mirrorColor)
@@ -34,6 +38,8 @@ namespace Template
             SpecularColor = specularColor;
             Specularity = specularity;
             MirrorColor = mirrorColor;
+
+            Texture = new Texture();
         }
 
         // Overridable function voor intersection
@@ -83,7 +89,7 @@ namespace Template
             Vector3 normal = position - this.Pos;
             // adapt the normal
             if(Vector3.Dot(normal, direction) > 0) normal*=-1;
-            return new Intersection(position, t, this, Vector3.Normalize(normal));
+            return new Intersection(position, t, this, Vector3.Normalize(normal), new Color3(0f, 0f, 0f));
         }
     }
 
@@ -115,7 +121,19 @@ namespace Template
             // adapt the normal
             if (Vector3.Dot(normal, direction) > 0) normal *= -1;
 
-            return new Intersection(position, t, this, normal);
+            // add texture axes (U, V)
+            Vector3 U = Vector3.Cross(N, new Vector3(0f, 1f, 0f)).Normalized();
+            Vector3 V = Vector3.Cross(N, U).Normalized();
+
+            // transform object world coordinates to local coordinates so we can use those to calculate uv coordinates of texture
+            Vector3 local = position - Pos;
+            float u = Vector3.Dot(local, U);
+            float v = Vector3.Dot(local, V);
+
+            u = Math.Clamp(u, 0f, 1f);
+            v = Math.Clamp(v, 0f, 1f);
+
+            return new Intersection(position, t, this, normal, Texture.GetPixel(u, v));
         }
     }
     
@@ -220,7 +238,7 @@ namespace Template
             if(Vector3.Dot(shadingNormal, direction) > 0) shadingNormal*=-1;
             //TODO: add texture coordinates also??
 
-            return new Intersection(P, t, this, shadingNormal); 
+            return new Intersection(P, t, this, shadingNormal, new Color3(0f, 0f, 0f)); 
         }
     }
 }
