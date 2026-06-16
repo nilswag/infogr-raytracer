@@ -34,9 +34,12 @@ class MyApplication
         MeshT mesh = Util.ImportMesh("assets/cube.obj");
         scenes["basic"] = new RTScene(
         [
-                    //  position                    color/intensity             //direction            //cutoff
+            //  point light   position                 color/intensity        
             new Light(new Vector3(-8f, 5f, 5f), new Color3(100f, 100f, 100f)),
-            new Light(new Vector3(-10f, 3f, 5f), new Color3(100f, 100f, 100f), new Vector3(2f, -2f, 5f), 0.95f)
+            //  spotlight   position                    color/intensity             direction            cutoff  
+            new Light(new Vector3(-10f, 3f, 5f), new Color3(100f, 100f, 100f), new Vector3(2f, -2f, 5f), 0.95f),
+            //  arealight    position                   color/intensity horizontal direction vertical direction
+            new Light(new Vector3(6f, 7f, 10f), new Color3(120f, 120f, 120f), new Vector3(4.0f, 0f, 0f), new Vector3(0f, 0f, 4.0f))
         ],
         [
                     //  center                   radius     color                 specularcolor     specularity   mirrorcolor
@@ -66,9 +69,6 @@ class MyApplication
             scenes["basic"].Primitives.Add(tr);
         }
 
-        // TODO: possibly more scene initializations
-
-        //TODO: Maybe allow users to pick scene --> method?
         rayTracer.Scene = scenes["basic"];
         camera.SetPoints();
     }
