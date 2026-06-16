@@ -51,7 +51,11 @@ class MyApplication
             new Sphere(new Vector3(5f, 0f, 14f), 2f, new Color3(0f, 0f, 0f), new Color3(0f, 0f, 0f), 1, new Color3(1f, 1f, 1f)),
             new Sphere(new Vector3(5f, 0f, 0f), 2f, new Color3(0f, 0f, 1f), new Color3(0f, 0f, 0f), 1, new Color3(0f, 0f, 0f)),
                     //    normal                    position                    color                       specularcolor           specularity     mirrorcolor
-            new Plane(new Vector3(0f, 1f, 0f), new Vector3(0f, -5f, 0f), new Color3(0.5f, 0.5f, 0.5f)),
+            new Plane(new Vector3(0f, 1f, 0f), new Vector3(0f, -5f, 0f), new Color3(0.5f, 0.5f, 0.5f))
+            {
+                Texture = new Texture("assets/bricks.jpg", 0.1f)
+            },
+
             new Plane(new Vector3(0f, 0f, -1f), new Vector3(0f, 0f, 25f), new Color3(0.3f, 0.2f, 0.5f), new Color3(0.2f, 0.2f, 0.2f), 10, new Color3(0f, 0f, 0f)),
                     //      
             new Triangle(new Vector3(-10f, -3f, 13f), new Vector3(-15f, 0f, 13f), new Vector3(-8f, 5f, 13f), new Color3(1f, 0f, 0f))

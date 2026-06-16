@@ -97,9 +97,6 @@ namespace Template
             float u = 0.5f + MathF.Atan2(OP.Z, OP.X) / (2f * MathF.PI);
             float v = 0.5f - MathF.Asin(OP.Y) / MathF.PI;
 
-            u = u - MathF.Floor(u);   // wrap horizontally
-            v = Math.Clamp(v, 0f, 1f); // clamp vertically
-
             return new Intersection(position, t, this, Vector3.Normalize(normal), Texture.GetPixel(u, v));
         }
     }
@@ -133,16 +130,17 @@ namespace Template
             if (Vector3.Dot(normal, direction) > 0) normal *= -1;
 
             // add texture axes (U, V)
+
             Vector3 U = Vector3.Cross(N, new Vector3(0f, 1f, 0f)).Normalized();
+            if (MathF.Abs(N.Y) > 0.99f)
+                U = Vector3.Normalize(Vector3.Cross(N, new Vector3(0f, 0f, 1f)));
+
             Vector3 V = Vector3.Cross(N, U).Normalized();
 
             // transform object world coordinates to local coordinates so we can use those to calculate uv coordinates of texture
             Vector3 local = position - Pos;
             float u = Vector3.Dot(local, U);
             float v = Vector3.Dot(local, V);
-
-            u = u - MathF.Floor(u);
-            v = v - MathF.Floor(v);
 
             return new Intersection(position, t, this, normal, Texture.GetPixel(u, v));
         }
@@ -250,9 +248,6 @@ namespace Template
 
             float u = alfa * A.X + beta * B.X + gamma * C.X;
             float v = alfa * A.Y + beta * B.Y + gamma * C.Y;
-
-            u = u - MathF.Floor(u);
-            v = v - MathF.Floor(v);
 
             return new Intersection(P, t, this, shadingNormal, Texture.GetPixel(u, v)); 
         }
