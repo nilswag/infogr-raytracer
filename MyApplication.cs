@@ -41,7 +41,13 @@ class MyApplication
         [
                     //  center                   radius     color                 specularcolor     specularity   mirrorcolor
             new Sphere(new Vector3(-5f, 0f, 13f), 2f, new Color3(1f, 0f, 0f), new Color3(1f, 0.5f, 0f), 10, new Color3(0f, 0f, 0f)),
-            new Sphere(new Vector3(0f, 0f, 12f), 2f, new Color3(0f, 1f, 0f), new Color3(0.3f, 0.5f, 0f), 10, new Color3(0.5f, 0.5f, 0.5f)),
+
+            new Sphere(new Vector3(0f, 0f, 12f), 2f, new Color3(0f, 1f, 0f), new Color3(0.3f, 0.5f, 0f), 10, new Color3(0.5f, 0.5f, 0.5f))
+            {
+                Texture = new Texture("assets/bricks.jpg")
+            },
+
+
             new Sphere(new Vector3(5f, 0f, 14f), 2f, new Color3(0f, 0f, 0f), new Color3(0f, 0f, 0f), 1, new Color3(1f, 1f, 1f)),
             new Sphere(new Vector3(5f, 0f, 0f), 2f, new Color3(0f, 0f, 1f), new Color3(0f, 0f, 0f), 1, new Color3(0f, 0f, 0f)),
                     //    normal                    position                    color                       specularcolor           specularity     mirrorcolor

@@ -88,8 +88,19 @@ namespace Template
             Vector3 position = direction * t + origin;
             Vector3 normal = position - this.Pos;
             // adapt the normal
-            if(Vector3.Dot(normal, direction) > 0) normal*=-1;
-            return new Intersection(position, t, this, Vector3.Normalize(normal), new Color3(0f, 0f, 0f));
+            if(Vector3.Dot(normal, direction) > 0) normal *= -1;
+
+            // u, v coordinate calculation
+            Vector3 OP = (position - Pos).Normalized();    // vector from sphere center to intersection point
+
+            float theta = (float)Math.Atan2(OP.Z, OP.X);
+            float u = 0.5f + MathF.Atan2(OP.Z, OP.X) / (2f * MathF.PI);
+            float v = 0.5f - MathF.Asin(OP.Y) / MathF.PI;
+
+            u = u - MathF.Floor(u);   // wrap horizontally
+            v = Math.Clamp(v, 0f, 1f); // clamp vertically
+
+            return new Intersection(position, t, this, Vector3.Normalize(normal), Texture.GetPixel(u, v));
         }
     }
 
@@ -130,8 +141,8 @@ namespace Template
             float u = Vector3.Dot(local, U);
             float v = Vector3.Dot(local, V);
 
-            u = Math.Clamp(u, 0f, 1f);
-            v = Math.Clamp(v, 0f, 1f);
+            u = u - MathF.Floor(u);
+            v = v - MathF.Floor(v);
 
             return new Intersection(position, t, this, normal, Texture.GetPixel(u, v));
         }
