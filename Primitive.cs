@@ -1,5 +1,6 @@
 ﻿using OpenTK.Mathematics;
-
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Template
 {
@@ -16,22 +17,28 @@ namespace Template
         // Kleur van mirror primitive
         public Color3 MirrorColor { get; set; }
 
-        public Primitive(Vector3 pos, Color3 color)
+        public Image<Rgba32> Texture { get; set; }
+
+        public Primitive(Vector3 pos, Color3 color, string texturePath)
         {
             Pos = pos;
             Color = color;
             SpecularColor = new Color3(0, 0, 0);;
             Specularity = 1;
             MirrorColor = new Color3(0, 0, 0);
+
+            Texture = Image.Load<Rgba32>(texturePath);
         }
 
-        public Primitive(Vector3 pos, Color3 color, Color3 specularColor, int specularity, Color3 mirrorColor)
+        public Primitive(Vector3 pos, Color3 color, Color3 specularColor, int specularity, Color3 mirrorColor, string texturePath)
         {
             Pos = pos;
             Color = color;
             SpecularColor = specularColor;
             Specularity = specularity;
             MirrorColor = mirrorColor;
+
+            Texture = Image.Load<Rgba32>(texturePath);
         }
 
         // Overridable function voor intersection
@@ -44,12 +51,12 @@ namespace Template
         // Radius of sphere
         public float Radius { get; set; }
 
-        public Sphere(Vector3 pos, float radius, Color3 color) : base(pos, color)
+        public Sphere(Vector3 pos, float radius, Color3 color, string texturePath = "assets/default.png") : base(pos, color, texturePath)
         {
             Radius = radius;
         }
 
-        public Sphere(Vector3 pos, float radius, Color3 color, Color3 specularColor, int specularity, Color3 mirrorColor) : base(pos, color, specularColor, specularity, mirrorColor)
+        public Sphere(Vector3 pos, float radius, Color3 color, Color3 specularColor, int specularity, Color3 mirrorColor, string texturePath = "assets/default.png") : base(pos, color, specularColor, specularity, mirrorColor, texturePath)
         {
             Radius = radius;
         }
@@ -90,12 +97,12 @@ namespace Template
         // Normal vector of plane
         public Vector3 N { get; set; }
 
-        public Plane(Vector3 n, Vector3 pos, Color3 color) : base(pos, color)
+        public Plane(Vector3 n, Vector3 pos, Color3 color, string texturePath = "assets/default.png") : base(pos, color, texturePath)
         {
             N = Vector3.Normalize(n);
         }
 
-        public Plane(Vector3 n, Vector3 pos, Color3 color, Color3 specularColor, int specularity, Color3 mirrorColor) : base(pos, color, specularColor, specularity, mirrorColor)
+        public Plane(Vector3 n, Vector3 pos, Color3 color, Color3 specularColor, int specularity, Color3 mirrorColor, string texturePath = "assets/default.png") : base(pos, color, specularColor, specularity, mirrorColor, texturePath)
         {
             N = Vector3.Normalize(n);
         }
@@ -106,18 +113,12 @@ namespace Template
             // Vul P(t) = E + t*d in bij (P(t) - P0) * n^ = 0 en los op voor t
             float t = Vector3.Dot(this.Pos - origin, this.N)/Vector3.Dot(direction, this.N);
 
-            if (t > 0) {
-                Vector3 position = direction * t + origin;
-                Vector3 normal = this.N;
-                // adapt the normal
-                if(Vector3.Dot(normal, direction) > 0) normal*=-1;
-                return new Intersection(position, t, this, normal);
-            } else
-            {
-                return null;
-            }
-           
-        }
+            if (t <= 0) return null; 
+            Vector3 position = direction * t + origin;
+            Vector3 normal = this.N;
+            // adapt the normal
+            if(Vector3.Dot(normal, direction) > 0) normal*=-1;
+            return new Intersection(position, t, this, normal);
     }
     
     public class Triangle : Primitive
@@ -140,7 +141,7 @@ namespace Template
         public Vector2 UVB { get; set; }
         public Vector2 UVC { get; set; }
 
-        public Triangle(Vector3 a, Vector3 b, Vector3 c, Color3 color): base(a, color)
+        public Triangle(Vector3 a, Vector3 b, Vector3 c, Color3 color, string texturePath = "assets/default.png") : base(a, color, texturePath)
         {
             A = a;
             B = b;
@@ -151,7 +152,7 @@ namespace Template
             NC = N;
         }
 
-        public Triangle(Vector3 a, Vector3 b, Vector3 c, Color3 color, Color3 specularColor, int specularity, Color3 mirrorColor): base(a, color, specularColor, specularity, mirrorColor)
+        public Triangle(Vector3 a, Vector3 b, Vector3 c, Color3 color, Color3 specularColor, int specularity, Color3 mirrorColor, string texturePath = "assets/default.png") : base(a, color, specularColor, specularity, mirrorColor, texturePath)
         {
             A = a;
             B = b;
