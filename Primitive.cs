@@ -247,9 +247,14 @@ namespace Template
             //normal interpolation
             Vector3 shadingNormal = Vector3.Normalize(alfa * NA + beta * NB + gamma * NC);
             if(Vector3.Dot(shadingNormal, direction) > 0) shadingNormal*=-1;
-            //TODO: add texture coordinates also??
 
-            return new Intersection(P, t, this, shadingNormal, new Color3(0f, 0f, 0f)); 
+            float u = alfa * A.X + beta * B.X + gamma * C.X;
+            float v = alfa * A.Y + beta * B.Y + gamma * C.Y;
+
+            u = u - MathF.Floor(u);
+            v = v - MathF.Floor(v);
+
+            return new Intersection(P, t, this, shadingNormal, Texture.GetPixel(u, v)); 
         }
     }
 }
