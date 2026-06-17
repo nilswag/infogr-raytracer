@@ -18,6 +18,9 @@ namespace Template
         // Kleur van mirror primitive
         public Color3 MirrorColor { get; set; }
 
+        // Index of refraction (0 = niet-refractief, 1.5 = glas)
+        public float IOR { get; set; }
+
         public Texture Texture { get; set; }
 
         public Primitive(Vector3 pos, Color3 color)
@@ -27,7 +30,7 @@ namespace Template
             SpecularColor = new Color3(0, 0, 0);;
             Specularity = 1;
             MirrorColor = new Color3(0, 0, 0);
-
+            IOR = 0f;
             Texture = new Texture();
         }
 
@@ -38,7 +41,7 @@ namespace Template
             SpecularColor = specularColor;
             Specularity = specularity;
             MirrorColor = mirrorColor;
-
+            IOR = 0f;
             Texture = new Texture();
         }
 

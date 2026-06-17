@@ -53,6 +53,7 @@ class MyApplication
 
             new Sphere(new Vector3(5f, 0f, 14f), 2f, new Color3(0f, 0f, 0f), new Color3(0f, 0f, 0f), 1, new Color3(1f, 1f, 1f)),
             new Sphere(new Vector3(5f, 0f, 0f), 2f, new Color3(0f, 0f, 1f), new Color3(0f, 0f, 0f), 1, new Color3(0f, 0f, 0f)),
+            new Sphere(new Vector3(-2f, 0f, 8f), 2f, new Color3(0.9f, 0.9f, 1f), new Color3(0f, 0f, 0f), 1, new Color3(0f, 0f, 0f)) { IOR = 1.5f },
                     //    normal                    position                    color                       specularcolor           specularity     mirrorcolor
             new Plane(new Vector3(0f, 1f, 0f), new Vector3(0f, -5f, 0f), new Color3(0.5f, 0.5f, 0.5f))
             {

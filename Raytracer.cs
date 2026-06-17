@@ -293,6 +293,21 @@ namespace Template
                     Vector2 reflEnd = ToDebug(debugInter.Pos + reflection * 10f);
                     Surf.Line((int)hitDebug.X, (int)hitDebug.Y, (int)reflEnd.X, (int)reflEnd.Y, Color4.Cyan);
                 }
+
+                // Refracted ray: only if the hit primitive has an IOR set (Snell's law)
+                if (debugInter.Prim.IOR > 0f)
+                {
+                    Vector3 n = debugInter.Norm;
+                    float eta = 1.0f / debugInter.Prim.IOR;
+                    float cosI = -Vector3.Dot(n, dir);
+                    float sin2T = eta * eta * (1f - cosI * cosI);
+                    if (sin2T <= 1f)
+                    {
+                        Vector3 refracted = eta * dir + (eta * cosI - MathF.Sqrt(1f - sin2T)) * n;
+                        Vector2 refrEnd = ToDebug(debugInter.Pos + refracted * 10f);
+                        Surf.Line((int)hitDebug.X, (int)hitDebug.Y, (int)refrEnd.X, (int)refrEnd.Y, Color4.Magenta);
+                    }
+                }
             }
             else
             {
@@ -302,10 +317,11 @@ namespace Template
             }
 
             // Legend
-            Surf.Print("primary ray", left + 10, panelHeight - 70, Color4.Lime);
-            Surf.Print("shadow ray (free)", left + 10, panelHeight - 55, Color4.Yellow);
-            Surf.Print("shadow ray (blocked)", left + 10, panelHeight - 40, Color4.Red);
-            Surf.Print("reflected ray", left + 10, panelHeight - 25, Color4.Cyan);
+            Surf.Print("primary ray", left + 10, panelHeight - 85, Color4.Lime);
+            Surf.Print("shadow ray (free)", left + 10, panelHeight - 70, Color4.Yellow);
+            Surf.Print("shadow ray (blocked)", left + 10, panelHeight - 55, Color4.Red);
+            Surf.Print("reflected ray", left + 10, panelHeight - 40, Color4.Cyan);
+            Surf.Print("refracted ray", left + 10, panelHeight - 25, Color4.Magenta);
 
             // Print the current camera position for reference
             Surf.Print($"cam x: {Camera.Pos.X:F1}", left + 10, 30, Color4.White);
