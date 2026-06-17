@@ -19,12 +19,19 @@ namespace Template
         // Cutoff of light (for spotlight)
         public float CutOff { get; set; } // set between 0 (lots of light) and 1 (tiny light)
 
+        // Horizontal direction (for area light)
+        public Vector3 HorDir { get; set; }
+        // Vertical direction (for area light)
+        public Vector3 VerDir { get; set; }
+
         public Light(Vector3 pos, Color3 intensity)
         {
             Pos = pos;
             Intensity = intensity;
             Direction = new Vector3(0, 0, 0);
             CutOff = 0;
+            HorDir = new Vector3(0, 0, 0);
+            VerDir = new Vector3(0, 0, 0);
         }
 
         //spotlight
@@ -34,6 +41,19 @@ namespace Template
             Intensity = intensity;
             Direction = Vector3.Normalize(direction);
             CutOff = cutoff;
+            HorDir = new Vector3(0, 0, 0);
+            VerDir = new Vector3(0, 0, 0);
+        }
+
+        //area light
+        public Light(Vector3 pos, Color3 intensity, Vector3 hordir, Vector3 verdir)
+        {
+            Pos = pos;
+            Intensity = intensity;
+            Direction = new Vector3(0, 0, 0);
+            CutOff = 0;
+            HorDir = hordir;
+            VerDir = verdir;
         }
     }
 }

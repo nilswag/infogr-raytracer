@@ -1,5 +1,6 @@
 ﻿using OpenTK.Mathematics;
-
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Template
 {
@@ -10,11 +11,14 @@ namespace Template
         // Kleur van primitive
         public Color3 Color { get; set; }
         // Kleur van glossy primitive
+
         public Color3 SpecularColor { get; set; }
         // Specularity van glossy primitive
         public int Specularity { get; set; }
         // Kleur van mirror primitive
         public Color3 MirrorColor { get; set; }
+
+        public Texture Texture { get; set; }
 
         public Primitive(Vector3 pos, Color3 color)
         {
@@ -23,6 +27,8 @@ namespace Template
             SpecularColor = new Color3(0, 0, 0);;
             Specularity = 1;
             MirrorColor = new Color3(0, 0, 0);
+
+            Texture = new Texture();
         }
 
         public Primitive(Vector3 pos, Color3 color, Color3 specularColor, int specularity, Color3 mirrorColor)
@@ -32,6 +38,8 @@ namespace Template
             SpecularColor = specularColor;
             Specularity = specularity;
             MirrorColor = mirrorColor;
+
+            Texture = new Texture();
         }
 
         // Overridable function voor intersection
@@ -80,8 +88,16 @@ namespace Template
             Vector3 position = direction * t + origin;
             Vector3 normal = position - this.Pos;
             // adapt the normal
-            if(Vector3.Dot(normal, direction) > 0) normal*=-1;
-            return new Intersection(position, t, this, Vector3.Normalize(normal));
+            if(Vector3.Dot(normal, direction) > 0) normal *= -1;
+
+            // u, v coordinate calculation
+            Vector3 OP = (position - Pos).Normalized();    // vector from sphere center to intersection point
+
+            float theta = (float)Math.Atan2(OP.Z, OP.X);
+            float u = 0.5f + MathF.Atan2(OP.Z, OP.X) / (2f * MathF.PI);
+            float v = 0.5f - MathF.Asin(OP.Y) / MathF.PI;
+
+            return new Intersection(position, t, this, Vector3.Normalize(normal), Texture.GetPixel(u, v));
         }
     }
 
@@ -104,19 +120,29 @@ namespace Template
         {
             // Neemt aan dat de ray de !genormaliseerde! richtings vector + p0 is
             // Vul P(t) = E + t*d in bij (P(t) - P0) * n^ = 0 en los op voor t
-            float t = Vector3.Dot(this.Pos - origin, this.N)/Vector3.Dot(direction, this.N);
+            float t = Vector3.Dot(this.Pos - origin, this.N) / Vector3.Dot(direction, this.N);
+            if (t <= 0) return null;
 
-            if (t > 0) {
-                Vector3 position = direction * t + origin;
-                Vector3 normal = this.N;
-                // adapt the normal
-                if(Vector3.Dot(normal, direction) > 0) normal*=-1;
-                return new Intersection(position, t, this, normal);
-            } else
-            {
-                return null;
-            }
-           
+            Vector3 position = direction * t + origin;
+            Vector3 normal = this.N;
+
+            // adapt the normal
+            if (Vector3.Dot(normal, direction) > 0) normal *= -1;
+
+            // add texture axes (U, V)
+
+            Vector3 U = Vector3.Cross(N, new Vector3(0f, 1f, 0f)).Normalized();
+            if (MathF.Abs(N.Y) > 0.99f)
+                U = Vector3.Normalize(Vector3.Cross(N, new Vector3(0f, 0f, 1f)));
+
+            Vector3 V = Vector3.Cross(N, U).Normalized();
+
+            // transform object world coordinates to local coordinates so we can use those to calculate uv coordinates of texture
+            Vector3 local = position - Pos;
+            float u = Vector3.Dot(local, U);
+            float v = Vector3.Dot(local, V);
+
+            return new Intersection(position, t, this, normal, Texture.GetPixel(u, v));
         }
     }
     
@@ -140,7 +166,7 @@ namespace Template
         public Vector2 UVB { get; set; }
         public Vector2 UVC { get; set; }
 
-        public Triangle(Vector3 a, Vector3 b, Vector3 c, Color3 color): base(a, color)
+        public Triangle(Vector3 a, Vector3 b, Vector3 c, Color3 color) : base(a, color)
         {
             A = a;
             B = b;
@@ -151,7 +177,7 @@ namespace Template
             NC = N;
         }
 
-        public Triangle(Vector3 a, Vector3 b, Vector3 c, Color3 color, Color3 specularColor, int specularity, Color3 mirrorColor): base(a, color, specularColor, specularity, mirrorColor)
+        public Triangle(Vector3 a, Vector3 b, Vector3 c, Color3 color, Color3 specularColor, int specularity, Color3 mirrorColor) : base(a, color, specularColor, specularity, mirrorColor)
         {
             A = a;
             B = b;
@@ -161,7 +187,7 @@ namespace Template
             NB = N;
             NC = N;
         }
-        public Triangle(Vector3 a, Vector3 b, Vector3 c, Vector3 na, Vector3 nb, Vector3 nc, Vector2 uva, Vector2 uvb, Vector2 uvc, Color3 color): base(a, color)
+        public Triangle(Vector3 a, Vector3 b, Vector3 c, Vector3 na, Vector3 nb, Vector3 nc, Vector2 uva, Vector2 uvb, Vector2 uvc, Color3 color) : base(a, color)
         {
             A = a;
             B = b;
@@ -219,9 +245,11 @@ namespace Template
             //normal interpolation
             Vector3 shadingNormal = Vector3.Normalize(alfa * NA + beta * NB + gamma * NC);
             if(Vector3.Dot(shadingNormal, direction) > 0) shadingNormal*=-1;
-            //TODO: add texture coordinates also??
 
-            return new Intersection(P, t, this, shadingNormal); 
+            float u = alfa * A.X + beta * B.X + gamma * C.X;
+            float v = alfa * A.Y + beta * B.Y + gamma * C.Y;
+
+            return new Intersection(P, t, this, shadingNormal, Texture.GetPixel(u, v)); 
         }
     }
 }

@@ -20,12 +20,15 @@ namespace Template
          // Normal at intersection point
         public Vector3 Norm { get; set; }
 
-        public Intersection(Vector3 pos, float dist, Primitive prim, Vector3 norm)
+        public Color3 Color { get; set; }
+
+        public Intersection(Vector3 pos, float dist, Primitive prim, Vector3 norm, Color3 color)
         {
             Pos = pos;
             Dist = dist;
             Prim = prim;
             Norm = norm;
+            Color = color;
         }
     }
 }

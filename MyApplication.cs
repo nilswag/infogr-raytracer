@@ -32,34 +32,43 @@ class MyApplication
     {
         //(optional) example of how you can load a triangle mesh in any file format supported by Assimp
         MeshT mesh = Util.ImportMesh("assets/cube.obj");
-
         scenes["basic"] = new RTScene(
         [
-                    //  position                    color/intensity             //direction            //cutoff
+            //  point light   position                 color/intensity        
             new Light(new Vector3(-8f, 5f, 5f), new Color3(100f, 100f, 100f)),
-            new Light(new Vector3(-10f, 3f, 5f), new Color3(100f, 100f, 100f), new Vector3(2f, -2f, 5f), 0.95f)
+            //  spotlight   position                    color/intensity             direction            cutoff  
+            new Light(new Vector3(-10f, 3f, 5f), new Color3(100f, 100f, 100f), new Vector3(2f, -2f, 5f), 0.95f),
+            //  arealight    position                   color/intensity horizontal direction vertical direction
+            new Light(new Vector3(6f, 7f, 10f), new Color3(120f, 120f, 120f), new Vector3(4.0f, 0f, 0f), new Vector3(0f, 0f, 4.0f))
         ],
         [
                     //  center                   radius     color                 specularcolor     specularity   mirrorcolor
             new Sphere(new Vector3(-5f, 0f, 13f), 2f, new Color3(1f, 0f, 0f), new Color3(1f, 0.5f, 0f), 10, new Color3(0f, 0f, 0f)),
-            new Sphere(new Vector3(0f, 0f, 12f), 2f, new Color3(0f, 1f, 0f), new Color3(0.3f, 0.5f, 0f), 10, new Color3(0.5f, 0.5f, 0.5f)),
+
+            new Sphere(new Vector3(0f, 0f, 12f), 2f, new Color3(0f, 1f, 0f), new Color3(0.3f, 0.5f, 0f), 10, new Color3(0.5f, 0.5f, 0.5f))
+            {
+                Texture = new Texture("assets/bricks.jpg", 2.0f)
+            },
+
+
             new Sphere(new Vector3(5f, 0f, 14f), 2f, new Color3(0f, 0f, 0f), new Color3(0f, 0f, 0f), 1, new Color3(1f, 1f, 1f)),
             new Sphere(new Vector3(5f, 0f, 0f), 2f, new Color3(0f, 0f, 1f), new Color3(0f, 0f, 0f), 1, new Color3(0f, 0f, 0f)),
                     //    normal                    position                    color                       specularcolor           specularity     mirrorcolor
-            new Plane(new Vector3(0f, 1f, 0f), new Vector3(0f, -5f, 0f), new Color3(0.5f, 0.5f, 0.5f)),
+            new Plane(new Vector3(0f, 1f, 0f), new Vector3(0f, -5f, 0f), new Color3(0.5f, 0.5f, 0.5f))
+            {
+                Texture = new Texture("assets/bricks.jpg", 0.1f)
+            },
+
             new Plane(new Vector3(0f, 0f, -1f), new Vector3(0f, 0f, 25f), new Color3(0.3f, 0.2f, 0.5f), new Color3(0.2f, 0.2f, 0.2f), 10, new Color3(0f, 0f, 0f)),
                     //      
             new Triangle(new Vector3(-10f, -3f, 13f), new Vector3(-15f, 0f, 13f), new Vector3(-8f, 5f, 13f), new Color3(1f, 0f, 0f))
         ]);
 
-        foreach(Triangle tr in mesh.Triangles)
+        foreach (Triangle tr in mesh.Triangles)
         {
             scenes["basic"].Primitives.Add(tr);
         }
 
-        // TODO: possibly more scene initializations
-
-        //TODO: Maybe allow users to pick scene --> method?
         rayTracer.Scene = scenes["basic"];
         camera.SetPoints();
     }
@@ -67,6 +76,7 @@ class MyApplication
     public void RotateCamera(float yawDelta, float pitchDelta)
     {
         camera.Rotate(yawDelta, pitchDelta);
+
         rayTracer.Refresh();
     }
     public Vector3 GetForward() => camera.Forward;
@@ -82,6 +92,7 @@ class MyApplication
     {
         camera.Pos += delta;
         camera.SetPoints();
+
         rayTracer.Refresh();
     }
 
@@ -89,8 +100,6 @@ class MyApplication
     {
         camera.FOV = Math.Clamp(camera.FOV + delta, 20f, 150f);
         camera.SetPoints();
-
-        rayTracer.Refresh();
     }
 
     private void UpdateCameraTarget()
@@ -116,7 +125,6 @@ class MyApplication
         timer.Restart();
 
         //screen.Clear(0);
-
         rayTracer.Render();
 
         deltaTime += timer.Elapsed;
