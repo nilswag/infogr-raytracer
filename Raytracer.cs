@@ -174,16 +174,33 @@ namespace Template
                 return new Vector2(center.X + p.X * scale, center.Y + p.Z * scale);
             }
 
-            // Draw a small square marker, but only if it is fully inside the screen.
+            // Draw small square marker, but only if it is fully inside the panel.
             void DrawMarker(Vector2 p, Color3 color)
             {
                 int x = (int)p.X;
                 int y = (int)p.Y;
 
-                if (x - 2 < 0 || x + 2 >= Surf.width || y - 2 < 0 || y + 2 >= Surf.height)
+                if (x - 2 < left || x + 2 >= Surf.width || y - 2 < 0 || y + 2 >= Surf.height)
                     return;
 
                 Surf.Box(x - 2, y - 2, x + 2, y + 2, color);
+            }
+
+            // Draw line clipped to the debug panel using Liang-Barsky : method obtained by chatgpt due to little time. conversation can be found here: https://chatgpt.com/share/6a32a93e-36d4-83e9-a5cb-91f360bdd3fa
+            void DrawLine(int x1, int y1, int x2, int y2, Color3 color)
+            {
+                float dx = x2 - x1, dy = y2 - y1;
+                float t0 = 0f, t1 = 1f;
+                float[] p = { -dx, dx, -dy, dy };
+                float[] q = { x1 - left, Surf.width - 1 - x1, (float)y1, Surf.height - 1 - y1 };
+                for (int k = 0; k < 4; k++)
+                {
+                    if (p[k] == 0f) { if (q[k] < 0f) return; }
+                    else if (p[k] < 0f) t0 = MathF.Max(t0, q[k] / p[k]);
+                    else t1 = MathF.Min(t1, q[k] / p[k]);
+                }
+                if (t0 > t1) return;
+                Surf.Line((int)(x1 + t0 * dx), (int)(y1 + t0 * dy), (int)(x1 + t1 * dx), (int)(y1 + t1 * dy), color);
             }
 
             // Camera position in debug space
@@ -196,7 +213,7 @@ namespace Template
             DrawMarker(cam, Color4.Yellow);
 
             // Draw the camera forward direction as a yellow line
-            Surf.Line((int)cam.X, (int)cam.Y, (int)camForward.X, (int)camForward.Y, Color4.Yellow);
+            DrawLine((int)cam.X, (int)cam.Y, (int)camForward.X, (int)camForward.Y, Color4.Yellow);
 
             // Draw each primitive: spheres as circles, others as markers
             foreach (var obj in Scene.Primitives)
@@ -212,7 +229,7 @@ namespace Template
                         Vector3 p2 = sphere.Pos + new Vector3(MathF.Cos(angle2) * sphere.Radius, 0, MathF.Sin(angle2) * sphere.Radius);
                         Vector2 d1 = ToDebug(p1);
                         Vector2 d2 = ToDebug(p2);
-                        Surf.Line((int)d1.X, (int)d1.Y, (int)d2.X, (int)d2.Y, Color4.Red);
+                        DrawLine((int)d1.X, (int)d1.Y, (int)d2.X, (int)d2.Y, Color4.Red);
                     }
                 }
                 else
@@ -261,7 +278,7 @@ namespace Template
             {
                 // Primary ray, camera to intersection point
                 Vector2 hitDebug = ToDebug(debugInter.Pos);
-                Surf.Line((int)cam.X, (int)cam.Y, (int)hitDebug.X, (int)hitDebug.Y, Color4.Lime);
+                DrawLine((int)cam.X, (int)cam.Y, (int)hitDebug.X, (int)hitDebug.Y, Color4.Lime);
 
                 // Shadow rays, intersection to each light
                 foreach (var light in Scene.Lights)
@@ -282,7 +299,7 @@ namespace Template
 
                     Vector2 lightDebug = ToDebug(light.Pos);
                     Color3 shadowColor = blocked ? Color4.Red : Color4.Yellow;
-                    Surf.Line((int)hitDebug.X, (int)hitDebug.Y, (int)lightDebug.X, (int)lightDebug.Y, shadowColor);
+                    DrawLine((int)hitDebug.X, (int)hitDebug.Y, (int)lightDebug.X, (int)lightDebug.Y, shadowColor);
                 }
 
                 // Reflected ray: only if the hit primitive is a mirror
@@ -291,7 +308,7 @@ namespace Template
                     Vector3 n = debugInter.Norm;
                     Vector3 reflection = dir - 2 * n * Vector3.Dot(dir, n);
                     Vector2 reflEnd = ToDebug(debugInter.Pos + reflection * 10f);
-                    Surf.Line((int)hitDebug.X, (int)hitDebug.Y, (int)reflEnd.X, (int)reflEnd.Y, Color4.Cyan);
+                    DrawLine((int)hitDebug.X, (int)hitDebug.Y, (int)reflEnd.X, (int)reflEnd.Y, Color4.Cyan);
                 }
 
                 // Refracted ray: only if the hit primitive has an IOR set (Snell's law)
@@ -305,7 +322,7 @@ namespace Template
                     {
                         Vector3 refracted = eta * dir + (eta * cosI - MathF.Sqrt(1f - sin2T)) * n;
                         Vector2 refrEnd = ToDebug(debugInter.Pos + refracted * 10f);
-                        Surf.Line((int)hitDebug.X, (int)hitDebug.Y, (int)refrEnd.X, (int)refrEnd.Y, Color4.Magenta);
+                        DrawLine((int)hitDebug.X, (int)hitDebug.Y, (int)refrEnd.X, (int)refrEnd.Y, Color4.Magenta);
                     }
                 }
             }
@@ -313,7 +330,7 @@ namespace Template
             {
                 // No intersection, draw primary ray to fixed distance
                 Vector2 rayEnd = ToDebug(Camera.Pos + dir * 20f);
-                Surf.Line((int)cam.X, (int)cam.Y, (int)rayEnd.X, (int)rayEnd.Y, Color4.Lime);
+                DrawLine((int)cam.X, (int)cam.Y, (int)rayEnd.X, (int)rayEnd.Y, Color4.Lime);
             }
 
             // Legend
