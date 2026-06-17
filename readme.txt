@@ -31,7 +31,7 @@ Method: Parallel.For
 [X] Textures: on all implemented primitives
 [ ] Bump or normal mapping: on all implemented primitives
 [ ] Environment mapping: sphere or cube map, without intersecting actual sphere/cube/triangle primitives
-[ ] Refraction: also requires a reflected ray at every refractive surface, recursive
+[~] Refraction: also requires a reflected ray at every refractive surface, recursive
 [X] Area lights: soft shadows
 [ ] Scene graph: nodes containing transformations, 3D models or primitives, and child nodes; flattening optional
 [ ] Acceleration structure: bounding box or hierarchy, scene with 5000+ primitives
@@ -44,3 +44,6 @@ IMPORTANT: We loaded in the provided mesh, but we didnt move it from its origin 
 So you need to move a few steps forward with W before the scene becomes visible. 
 For glossy reflections: right now sample size is quite low to maintain good fps. Can be increased for testing.
 For area lights: right now sample size is quite low to maintain good fps. Can be increased for testing.
+We added sources as in-code comments
+Refraction we only partially managed to do: only in the debug output. But for adding it
+to the actual rendering we didnt have enough time
