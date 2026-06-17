@@ -327,7 +327,8 @@ namespace Template
             Surf.Print($"cam x: {Camera.Pos.X:F1}", left + 10, 30, Color4.White);
             Surf.Print($"cam y: {Camera.Pos.Y:F1}", left + 10, 45, Color4.White);
             Surf.Print($"cam z: {Camera.Pos.Z:F1}", left + 10, 60, Color4.White);
-        }        public Color3 TraceRay(Vector3 direction, Vector3 origin, int depth)
+        }        
+        public Color3 TraceRay(Vector3 direction, Vector3 origin, int depth)
         {
             //Finding the closest intersection
             Intersection closestInter = new Intersection(Camera.Pos, float.PositiveInfinity, new Plane(Camera.Pos, Camera.Pos, new Color3(0f, 0f, 0f)), Camera.Pos, new Color3(0f, 0f, 0f)); //random values

@@ -36,6 +36,8 @@ class MyApplication
         [
             //  point light   position                 color/intensity        
             new Light(new Vector3(-8f, 5f, 5f), new Color3(100f, 100f, 100f)),
+            //  point light   position                 color/intensity        
+            new Light(new Vector3(10f, 3f, 4f), new Color3(100f, 100f, 100f)),
             //  spotlight   position                    color/intensity             direction            cutoff  
             new Light(new Vector3(-10f, 3f, 5f), new Color3(100f, 100f, 100f), new Vector3(2f, -2f, 5f), 0.95f),
             //  arealight    position                   color/intensity horizontal direction vertical direction
@@ -43,9 +45,9 @@ class MyApplication
         ],
         [
                     //  center                   radius     color                 specularcolor     specularity   mirrorcolor
-            new Sphere(new Vector3(-5f, 0f, 13f), 2f, new Color3(1f, 0f, 0f), new Color3(1f, 0.5f, 0f), 10, new Color3(0f, 0f, 0f)),
+            new Sphere(new Vector3(-5f, 0f, 13f), 2f, new Color3(1f, 0f, 0f), new Color3(0.3f, 0.3f, 0.3f), 10, new Color3(0f, 0f, 0f)),
 
-            new Sphere(new Vector3(0f, 0f, 12f), 2f, new Color3(0f, 1f, 0f), new Color3(0.3f, 0.5f, 0f), 10, new Color3(0.5f, 0.5f, 0.5f))
+            new Sphere(new Vector3(0f, 0f, 12f), 2f, new Color3(0f, 1f, 0f), new Color3(1f, 0.1f, 0.1f), 10, new Color3(0.5f, 0.5f, 0.5f))
             {
                 Texture = new Texture("assets/bricks.jpg", 2.0f)
             },
