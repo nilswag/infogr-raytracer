@@ -141,30 +141,28 @@ namespace Template
 
         private void DrawDebug()
         {
-            // The debug panel starts at the middle of the screen
-            // and occupies the entire right half.
+            // The debug panel starts at the middle of the screen and occupies the entire right half
             int left = Surf.width / 2;
             int panelWidth = Surf.width - left;
             int panelHeight = Surf.height;
 
-            // Fill the debug panel with a dark background
-            // and draw a white border around it.
+            // Fill the debug panel with a dark background and draw a white border around it
             Surf.Bar(left, 0, Surf.width - 1, Surf.height - 1, new Color3(0.08f, 0.08f, 0.08f));
             Surf.Box(left, 0, Surf.width - 1, Surf.height - 1, Color4.White);
 
-            // Title text for the debug panel.
+            // Title text for the debug panel
             Surf.Print("DEBUG VIEW", left + 10, 10, Color4.White);
 
             // Scale factor for projecting world coordinates (x,z)
-            // into the 2D top-down debug panel.
+            // into the 2D top-down debug panel
             float scale = 12f;
 
-            // Center point of the debug panel in screen coordinates.
+            // Center point of the debug panel in screen coordinates
             Vector2 center = new Vector2(left + panelWidth / 2, panelHeight / 2);
 
             // Helper function:
-            // converts a 3D world position into a 2D top-down debug position.
-            // We use X horizontally and Z vertically for the top view.
+            // converts a 3D world position into a 2D top down debug position
+            // Using X horizontally and Z vertically for the top view
             Vector2 ToDebug(Vector3 p)
             {
                 return new Vector2(center.X + p.X * scale, center.Y + p.Z * scale);
@@ -182,57 +180,128 @@ namespace Template
                 Surf.Box(x - 2, y - 2, x + 2, y + 2, color);
             }
 
-            // Camera position in debug space.
+            // Camera position in debug space
             Vector2 cam = ToDebug(Camera.Pos);
 
-            // A point a bit in front of the camera,
-            // used to draw the viewing direction arrow.
+            // A point a bit in front of the camera, used to draw the viewing direction arrow
             Vector2 camForward = ToDebug(Camera.Pos + Camera.Forward * 2f);
 
-            // Draw the camera as a small yellow square.
+            // Draw the camera as a small yellow square
             DrawMarker(cam, Color4.Yellow);
 
-            // Draw the camera forward direction as a yellow line.
-            // Surf.Line is clipped, so this is safe.
+            // Draw the camera forward direction as a yellow line
             Surf.Line((int)cam.X, (int)cam.Y, (int)camForward.X, (int)camForward.Y, Color4.Yellow);
 
-            // Draw each primitive center as a small red square.
-            // This gives a simple top-down overview of scene object locations.
+            // Draw each primitive: spheres as circles, others as markers
             foreach (var obj in Scene.Primitives)
             {
-                Vector2 p = ToDebug(obj.Pos);
-                DrawMarker(p, Color4.Red);
+                if (obj is Sphere sphere)
+                {
+                    int steps = 32;
+                    for (int i = 0; i < steps; i++)
+                    {
+                        float angle1 = 2f * MathF.PI * i / steps;
+                        float angle2 = 2f * MathF.PI * (i + 1) / steps;
+                        Vector3 p1 = sphere.Pos + new Vector3(MathF.Cos(angle1) * sphere.Radius, 0, MathF.Sin(angle1) * sphere.Radius);
+                        Vector3 p2 = sphere.Pos + new Vector3(MathF.Cos(angle2) * sphere.Radius, 0, MathF.Sin(angle2) * sphere.Radius);
+                        Vector2 d1 = ToDebug(p1);
+                        Vector2 d2 = ToDebug(p2);
+                        Surf.Line((int)d1.X, (int)d1.Y, (int)d2.X, (int)d2.Y, Color4.Red);
+                    }
+                }
+                else
+                {
+                    DrawMarker(ToDebug(obj.Pos), Color4.Red);
+                }
             }
 
-            // We choose the center pixel of the LEFT render panel
-            // as the debug ray we want to visualize.
+            // We choose the center pixel of the left render panel
+            // as the debug ray we want to visualize
             int renderWidth = Surf.width / 2;
             int debugPixelX = renderWidth / 2;
             int debugPixelY = Surf.height / 2;
 
-            // Reconstruct the camera image plane basis vectors.
+            // Reconstruct the camera image plane basis vectors
             // u = horizontal direction across the image plane
             // v = vertical direction across the image plane
             Vector3 u = Camera.ImagePlane[1] - Camera.ImagePlane[0];
             Vector3 v = Camera.ImagePlane[2] - Camera.ImagePlane[0];
 
-            // Convert the chosen pixel to normalized image plane coordinates.
+            // Convert chosen pixel to normalized image plane coordinates
             float a = (debugPixelX + 0.5f) / renderWidth;
             float b = (debugPixelY + 0.5f) / Surf.height;
 
-            // Compute the exact 3D point on the image plane
-            // corresponding to the chosen debug pixel.
+            // Compute exact 3D point on the image plane
+            // corresponding to the chosen debug pixel
             Vector3 planePoint = Camera.ImagePlane[0] + a * u + b * v;
 
-            // Generate the primary ray direction for that pixel.
+            // Generate primary ray direction for that pixel
             Vector3 dir = Vector3.Normalize(planePoint - Camera.Pos);
 
-            // Draw the debug ray as a green line in the top-down panel.
-            // We extend it by an arbitrary length so it is visible.
-            Vector2 rayEnd = ToDebug(Camera.Pos + dir * 20f);
-            Surf.Line((int)cam.X, (int)cam.Y, (int)rayEnd.X, (int)rayEnd.Y, Color4.Lime);
+            // Find the closest intersection for the debug ray
+            Intersection debugInter = null;
+            float minDist = float.PositiveInfinity;
+            foreach (var obj in Scene.Primitives)
+            {
+                Intersection inter = obj.Intersect(dir, Camera.Pos);
+                if (inter != null && inter.Dist < minDist && inter.Dist > epsilon)
+                {
+                    debugInter = inter;
+                    minDist = inter.Dist;
+                }
+            }
 
-            // Print the current camera position for reference.
+            if (debugInter != null)
+            {
+                // Primary ray, camera to intersection point
+                Vector2 hitDebug = ToDebug(debugInter.Pos);
+                Surf.Line((int)cam.X, (int)cam.Y, (int)hitDebug.X, (int)hitDebug.Y, Color4.Lime);
+
+                // Shadow rays, intersection to each light
+                foreach (var light in Scene.Lights)
+                {
+                    Vector3 shadowDir = Vector3.Normalize(light.Pos - debugInter.Pos);
+                    float totalLength = (light.Pos - debugInter.Pos).Length;
+
+                    bool blocked = false;
+                    foreach (var obstacle in Scene.Primitives)
+                    {
+                        Intersection hit = obstacle.Intersect(shadowDir, debugInter.Pos);
+                        if (hit != null && epsilon < hit.Dist && hit.Dist < totalLength - epsilon && hit.Prim != debugInter.Prim)
+                        {
+                            blocked = true;
+                            break;
+                        }
+                    }
+
+                    Vector2 lightDebug = ToDebug(light.Pos);
+                    Color3 shadowColor = blocked ? Color4.Red : Color4.Yellow;
+                    Surf.Line((int)hitDebug.X, (int)hitDebug.Y, (int)lightDebug.X, (int)lightDebug.Y, shadowColor);
+                }
+
+                // Reflected ray: only if the hit primitive is a mirror
+                if (!debugInter.Prim.MirrorColor.Equals(new Color3(0f, 0f, 0f)))
+                {
+                    Vector3 n = debugInter.Norm;
+                    Vector3 reflection = dir - 2 * n * Vector3.Dot(dir, n);
+                    Vector2 reflEnd = ToDebug(debugInter.Pos + reflection * 10f);
+                    Surf.Line((int)hitDebug.X, (int)hitDebug.Y, (int)reflEnd.X, (int)reflEnd.Y, Color4.Cyan);
+                }
+            }
+            else
+            {
+                // No intersection, draw primary ray to fixed distance
+                Vector2 rayEnd = ToDebug(Camera.Pos + dir * 20f);
+                Surf.Line((int)cam.X, (int)cam.Y, (int)rayEnd.X, (int)rayEnd.Y, Color4.Lime);
+            }
+
+            // Legend
+            Surf.Print("primary ray", left + 10, panelHeight - 70, Color4.Lime);
+            Surf.Print("shadow ray (free)", left + 10, panelHeight - 55, Color4.Yellow);
+            Surf.Print("shadow ray (blocked)", left + 10, panelHeight - 40, Color4.Red);
+            Surf.Print("reflected ray", left + 10, panelHeight - 25, Color4.Cyan);
+
+            // Print the current camera position for reference
             Surf.Print($"cam x: {Camera.Pos.X:F1}", left + 10, 30, Color4.White);
             Surf.Print($"cam y: {Camera.Pos.Y:F1}", left + 10, 45, Color4.White);
             Surf.Print($"cam z: {Camera.Pos.Z:F1}", left + 10, 60, Color4.White);
@@ -249,7 +318,7 @@ namespace Template
                 }
             }
 
-            //Shading this intersection correctly, but only if one was found
+            //Shading this intersection correctly but only if one was found
             Color3 color = new Color3(0f, 0f, 0f); //black as basis
             if(closestInter.Dist < float.PositiveInfinity)
             {
@@ -282,7 +351,7 @@ namespace Template
 
                     bool hits = false;
 
-                    //Check if the shadowray hits obstacle on the way to light
+                    //Check if shadowray hits obstacle on the way to light
                     foreach (var obstacle in Scene.Primitives){
                         Intersection hit = obstacle.Intersect(shadowRay, closestInter.Pos);
                         float totalLength = (light.Pos - closestInter.Pos).Length;
